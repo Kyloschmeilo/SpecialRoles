@@ -21,7 +21,8 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 - `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Distribution.cs`
   (Host verteilt nach `RoleManager.SelectRoles`), `Net.cs` (eigene RPCs über `PlayerControl.HandleRpc`; `SetRoles` nur
   vom Host akzeptiert), `RoleState.cs`, `Hud.cs` (Namensschild, Aufgabenliste, Knöpfe je Rolle),
-  `AbilityButton.cs` (Klon des Kill-Knopfs: `SetTarget`, `SetCoolDown`, eigener Klick + Taste).
+  `RoleButton.cs` (Klon des Kill-Knopfs: `SetTarget`, `SetCoolDown`, eigener Klick + Taste; nicht `AbilityButton`
+  nennen – die Klasse gibt es im Spiel schon, sie gewinnt bei der Namensauflösung).
 - `Roles/` – Verhalten je Rolle. Neue Rolle: Klasse hier, in `RoleCatalog` `Implemented = true`, ggf. Knopf in
   `Hud.Buttons`, Einstellungen über `RoundSettings` (gehen mit `SetRoles` an alle → `RoleSync.Version` erhöhen).
 - Kills laufen immer über den Host (`RpcMurderPlayer`), Clients schicken nur Wünsche.

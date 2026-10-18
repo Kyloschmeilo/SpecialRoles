@@ -10,7 +10,7 @@ internal static class Janitor
 {
     private const float Range = 1.8f;
 
-    internal sealed class CleanButton : AbilityButton
+    internal sealed class CleanButton : RoleButton
     {
         protected override string Label => "Putzen";
         protected override KeyCode Key => KeyCode.F;

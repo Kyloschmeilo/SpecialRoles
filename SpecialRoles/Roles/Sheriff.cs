@@ -14,7 +14,7 @@ internal static class Sheriff
     // Host: letzter Schuss je Sheriff, gegen zu schnelles Feuern (z.B. andere Mod-Version)
     private static readonly Dictionary<byte, float> LastShot = new();
 
-    internal sealed class ShootButton : AbilityButton
+    internal sealed class ShootButton : RoleButton
     {
         protected override string Label => "Schießen";
         protected override KeyCode Key => KeyCode.Q;

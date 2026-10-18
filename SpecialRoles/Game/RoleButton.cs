@@ -9,7 +9,7 @@ namespace SpecialRoles.Game;
 /// Fähigkeits-Knopf einer Rolle: Klon des Kill-Knopfs (gleiches Aussehen, Cooldown-Anzeige, Ziel-Umriss) mit eigenem
 /// Text, eigener Taste und eigenem Klick. Wird pro Runde neu gebaut, sobald die eigene Rolle bekannt ist.
 /// </summary>
-internal abstract class AbilityButton
+internal abstract class RoleButton
 {
     private KillButton? _button;
     private bool _wasInMeeting;

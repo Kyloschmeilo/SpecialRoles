@@ -7,7 +7,8 @@ namespace SpecialRoles.Game;
 /// <summary>Läuft jeden Frame (HudManager.Update): eigene Rolle anzeigen, Fähigkeits-Knöpfe, passive Effekte.</summary>
 internal static class Hud
 {
-    private static readonly Dictionary<RoleId, AbilityButton> Buttons = new()
+    // Eigene Klasse heißt RoleButton, weil das Spiel schon eine Klasse AbilityButton hat
+    private static readonly Dictionary<RoleId, RoleButton> Buttons = new()
     {
         [RoleId.Sheriff] = new Sheriff.ShootButton(),
         [RoleId.Janitor] = new Janitor.CleanButton(),
