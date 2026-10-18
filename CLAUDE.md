@@ -37,7 +37,8 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 - Mehrspieler lässt sich allein nicht testen (Spiel startet nur einmal) → jeder Schritt braucht einen Testabend.
 
 ## Stand / offen
-- 0.1.0 (17.10.2026): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash. Baut auf GitHub, **noch nie im Spiel gelaufen**.
+- 0.1.0 (17.10.2026, Pre-Release auf GitHub seit 18.10.): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash.
+  **Noch nie im Spiel gelaufen** – nächster Schritt ist ein Testabend mit 2–3 Leuten.
 - Unbekannt: ob offizielle Server eigene RPC-IDs oder Host-Kills durch Crewmates (Sheriff) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
   Installer/Auto-Update (Vorlage: CrewStats `Updater.cs` + Installer), Siegbedingung Narr.
