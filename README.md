@@ -6,6 +6,15 @@ Eine BepInEx-Mod für **Among Us auf Steam (64-Bit)** mit 30 neuen Rollen: 17 f�
 > **Stand 0.1.0:** Grundgerüst zum Testen. Fertig sind **Sheriff**, **Putzkraft**, **Nachtsicht** und **Flash**,
 > die übrigen Rollen kommen nach und nach.
 
+## Installieren
+
+1. Unter [**Releases**](../../releases) beim neuesten Release die Datei **`SpecialRoles-Installer.bat`** herunterladen.
+2. Doppelklicken. Windows warnt evtl. vor einer unbekannten Datei → **Weitere Informationen → Trotzdem ausführen**.
+3. Enter drücken – der Installer findet Among Us, installiert BepInEx (64-Bit, falls noch nicht da) und die Mod.
+
+Neue Version: Installer einfach nochmal starten. Deinstallieren: Installer starten und **2** wählen
+(CrewStats und andere Mods bleiben erhalten). Der erste Spielstart dauert 1–2 Minuten.
+
 ## Wie es funktioniert
 
 - **Alle Spieler der Lobby brauchen die Mod in derselben Version.**

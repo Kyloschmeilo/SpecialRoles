@@ -32,8 +32,13 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   Fehler über die Job-Logs lesen. `dotnet test Tests` geht lokal (nur nuget.org). `nuget.config` liegt deshalb in
   `SpecialRoles/`, nicht im Wurzelordner.
 - Windows: wie CrewStats; **nur ins Spiel kopieren, wenn Kilian es sagt** → `-p:AmongUs=C:/nicht-kopieren`.
-- Release: `release.yml` (workflow_dispatch, Version aus der csproj, Notizen `release-notes/vX.Y.Z.md`, 0.x = Pre-Release).
-  **Nur auf Kilians Wunsch** auslösen.
+- Release: `release.yml` (workflow_dispatch, Version aus der csproj, Notizen `release-notes/vX.Y.Z.md`, 0.x = Pre-Release,
+  hängt DLL + Installer an; gibt es das Release schon, ersetzt er nur den Installer). **Nur auf Kilians Wunsch** auslösen.
+- Installer `installer/SpecialRoles-Installer.bat` = CrewStats-Installer ohne Webhook-Schritt (Batch/PowerShell-Hybrid,
+  **CRLF, ohne BOM**). Holt die neueste DLL aus `releases` **inkl. Pre-Releases** (`releases/latest` überspringt die),
+  Deinstallieren lässt BepInEx an, wenn andere Mods (CrewStats) da sind. Testen mit Fake-Ordner:
+  `SPECIALROLES_GAME_DIR`, `SPECIALROLES_BEPINEX_ZIP`, `SPECIALROLES_MOD_DLL` (geht auch in der Cloud mit portablem pwsh
+  von github.com/PowerShell/PowerShell/releases, `Read-Host` per Funktion überschreiben).
 - Mehrspieler lässt sich allein nicht testen (Spiel startet nur einmal) → jeder Schritt braucht einen Testabend.
 
 ## Stand / offen
@@ -41,4 +46,4 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   **Noch nie im Spiel gelaufen** – nächster Schritt ist ein Testabend mit 2–3 Leuten.
 - Unbekannt: ob offizielle Server eigene RPC-IDs oder Host-Kills durch Crewmates (Sheriff) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
-  Installer/Auto-Update (Vorlage: CrewStats `Updater.cs` + Installer), Siegbedingung Narr.
+  Auto-Update (Vorlage: CrewStats `Updater.cs`; muss Pre-Releases berücksichtigen), Siegbedingung Narr.
