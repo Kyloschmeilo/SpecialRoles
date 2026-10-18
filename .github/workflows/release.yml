@@ -1,0 +1,46 @@
+# Neues Release (nur wenn Kilian es will):
+#   1. Version in SpecialRoles/SpecialRoles.csproj erhöhen, Notizen in release-notes/v<Version>.md, committen + pushen
+#   2. Actions → „Release“ → „Run workflow“
+# Baut die DLL und hängt SpecialRoles.dll ans Release.
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Version und Notizen prüfen
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(grep -oP '(?<=<Version>)[^<]+' SpecialRoles/SpecialRoles.csproj | head -1)
+          echo "Version: $VERSION"
+          test -n "$VERSION"
+          test -f "release-notes/v$VERSION.md" || { echo "::error::release-notes/v$VERSION.md fehlt"; exit 1; }
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "::error::Release v$VERSION gibt es schon – erst die Version in SpecialRoles.csproj erhöhen"; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Tests
+        run: dotnet test Tests
+      - name: DLL bauen
+        run: dotnet build SpecialRoles -c Release -p:AmongUs=/nicht-kopieren
+      - name: Release erstellen
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          PRE=""
+          case "$VERSION" in 0.*) PRE="--prerelease";; esac
+          gh release create "v$VERSION" SpecialRoles/bin/Release/net6.0/SpecialRoles.dll \
+            --target "$GITHUB_SHA" --title "SpecialRoles $VERSION" --notes-file "release-notes/v$VERSION.md" $PRE

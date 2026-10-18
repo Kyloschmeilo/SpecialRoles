@@ -32,10 +32,12 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   Fehler über die Job-Logs lesen. `dotnet test Tests` geht lokal (nur nuget.org). `nuget.config` liegt deshalb in
   `SpecialRoles/`, nicht im Wurzelordner.
 - Windows: wie CrewStats; **nur ins Spiel kopieren, wenn Kilian es sagt** → `-p:AmongUs=C:/nicht-kopieren`.
+- Release: `release.yml` (workflow_dispatch, Version aus der csproj, Notizen `release-notes/vX.Y.Z.md`, 0.x = Pre-Release).
+  **Nur auf Kilians Wunsch** auslösen.
 - Mehrspieler lässt sich allein nicht testen (Spiel startet nur einmal) → jeder Schritt braucht einen Testabend.
 
 ## Stand / offen
-- 0.1.0 (17.10.2026): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash. **Noch nie im Spiel gelaufen.**
+- 0.1.0 (17.10.2026): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash. Baut auf GitHub, **noch nie im Spiel gelaufen**.
 - Unbekannt: ob offizielle Server eigene RPC-IDs oder Host-Kills durch Crewmates (Sheriff) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
-  Installer/Auto-Update (Vorlage: CrewStats `Updater.cs` + Installer), Release-Workflow, Siegbedingung Narr.
+  Installer/Auto-Update (Vorlage: CrewStats `Updater.cs` + Installer), Siegbedingung Narr.
