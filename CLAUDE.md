@@ -17,19 +17,31 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 ## Aufbau (`SpecialRoles/`)
 - `Core/` – spielunabhängig, auch von `Tests/` kompiliert: `Roles.cs` (`RoleId` – Werte gehen übers Netz, nie
   ändern; `RoleCatalog` mit `Implemented`-Flag: nur fertige Rollen werden vergeben/haben Config),
-  `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–212, `RoleSync` als Bytes, versioniert).
-- `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Distribution.cs`
-  (Host verteilt nach `RoleManager.SelectRoles`), `Net.cs` (eigene RPCs über `PlayerControl.HandleRpc`; `SetRoles` nur
-  vom Host akzeptiert), `RoleState.cs`, `Hud.cs` (Namensschild, Aufgabenliste, Knöpfe je Rolle),
-  `RoleButton.cs` (Klon des Kill-Knopfs: `SetTarget`, `SetCoolDown`, eigener Klick + Taste; nicht `AbilityButton`
-  nennen – die Klasse gibt es im Spiel schon, sie gewinnt bei der Namensauflösung).
-- `Roles/` – Verhalten je Rolle. Neue Rolle: Klasse hier, in `RoleCatalog` `Implemented = true`, ggf. Knopf in
-  `Hud.Buttons`, Einstellungen über `RoundSettings` (gehen mit `SetRoles` an alle → `RoleSync.Version` erhöhen).
-- Kills laufen immer über den Host (`RpcMurderPlayer`), Clients schicken nur Wünsche.
+  `RoundSettings.cs` (`SettingId` + `SettingCatalog`: alle Rollen-Einstellungen mit Standard/Min/Max, Config-Abschnitt
+  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–233, `RoleSync` v2 = Rollen + Einstellungen
+  als Liste (Id, Wert), unbekannte Ids werden ignoriert), `Png.cs` (Bilder als PNG für `ImageConversion.LoadImage`).
+- `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Round.cs` (läuft jeden
+  Frame aus HudManager.Update: Meeting-Beginn/-Ende, alle Rollen-Updates, `EndGame`/`NewGame`), `Net.cs` (eigene RPCs
+  über `PlayerControl.HandleRpc`, Host-Nachrichten werden nur vom Host angenommen), `Attack.cs` (Host: **jeder**
+  Angriff läuft über `Contact` (wachsamer Veteran) und `Lethal` (Medic-Schild, Glückspilz, Armor); `Kill` = Selbst-Kill
+  ohne Teleport), `Deaths.cs` (wer wann wo starb, Weg des Mörders fürs Medium, Spielrolle vor dem Tod),
+  `Distribution.cs`, `RoleState.cs`, `Hud.cs` (Knöpfe je Rolle, Name, Meeting-Zusätze), `RoleButton.cs` (Klon des
+  Kill-Knopfs; nicht `AbilityButton` nennen – die Klasse gibt es im Spiel schon), Bausteine `Notify` (Hinweis oben
+  mittig, Klon der Kill-Knopf-Schrift), `Arrows`, `Markers` (Ringe), `Footprints`, `Bodies`, `Speed` (Flash ×
+  Bestatter), `Sprites` (Kreis/Ring/Pfeil/Quadrat im Code gezeichnet), `Players`, `Colors`.
+- `Roles/` – Verhalten je Rolle (statische Klasse, Knopf als `Button`). Neue Rolle: Klasse hier, in `RoleCatalog`
+  `Implemented = true`, Knopf in `Hud.Buttons`, Update/Reset in `Round`, Einstellungen in `SettingCatalog`.
+- Kills, Wiederbeleben, Türen, Reparieren, Rollenwechsel laufen über den Host; Clients schicken nur Wünsche.
+  Bewegen darf sich jeder nur selbst (Transporter/Altruist: der Betroffene macht `RpcSnapTo` auf seinem Client).
+- Bewusste Vereinfachungen: Narr gewinnt mit eigenem Spielende-Grund 70 (CrewStats: „unbekannt“), seine Tasks zählen
+  normal; Bombe/Fluch/Biss töten per Selbst-Kill (Medium sieht beim Biss den Vampir, sonst „keine Spur“).
 
 ## Bauen & Testen
 - Cloud: `nuget.bepinex.dev` ist von dort gesperrt → Mod nur auf GitHub Actions bauen (`build.yml`, bei jedem Push),
-  Fehler über die Job-Logs lesen. `dotnet test Tests` geht lokal (nur nuget.org). `nuget.config` liegt deshalb in
+  Fehler über die Job-Logs lesen. Spiel-Signaturen nachschlagen: Workflow **API-Dump** (`api-dump.yml`, Eingabe z.B.
+  `PlayerControl.Rpc* MeetingHud`) → Ausgabe im Job-Log (`tools/ApiDump`, MetadataLoadContext gegen die Interop-DLLs).
+  Unity-Funktionen, die das Spiel nie benutzt, können trotz Interop zur Laufzeit fehlen → bewährte Wege nehmen
+  (Bilder per `ImageConversion.LoadImage`, kein `ColorUtility`/`SetPixels`). `dotnet test Tests` geht lokal (nur nuget.org). `nuget.config` liegt deshalb in
   `SpecialRoles/`, nicht im Wurzelordner.
 - Windows: wie CrewStats; **nur ins Spiel kopieren, wenn Kilian es sagt** → `-p:AmongUs=C:/nicht-kopieren`.
 - Release: `release.yml` (workflow_dispatch, Version aus der csproj, Notizen `release-notes/vX.Y.Z.md`, 0.x = Pre-Release,
@@ -43,7 +55,10 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 
 ## Stand / offen
 - 0.1.0 (17.10.2026, Pre-Release auf GitHub seit 18.10.): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash.
-  **Noch nie im Spiel gelaufen** – nächster Schritt ist ein Testabend mit 2–3 Leuten.
-- Unbekannt: ob offizielle Server eigene RPC-IDs oder Host-Kills durch Crewmates (Sheriff) als „Hacking“ werten.
+  Von Kilian getestet: „alles klappt“ (22.10.2026).
+- 0.2.0 (22.10.2026, Branch `main`, noch **nicht** veröffentlicht): alle 30 Rollen. Baut auf GitHub, **noch nie im
+  Spiel gelaufen** – nächster Schritt ist ein Testabend (Checkliste je Rolle; TestLab-Bots helfen für Einzeltests).
+- Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
+  oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
-  Auto-Update (Vorlage: CrewStats `Updater.cs`; muss Pre-Releases berücksichtigen), Siegbedingung Narr.
+  Auto-Update (Vorlage: CrewStats `Updater.cs`; muss Pre-Releases berücksichtigen).

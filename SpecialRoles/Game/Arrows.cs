@@ -25,13 +25,14 @@ internal static class Arrows
 
         var from = (Vector2)local.transform.position;
         var direction = target - local.GetTruePosition();
-        var visible = direction.magnitude > Distance + 0.3f;
+        var length = direction.magnitude;
+        var visible = length > Distance + 0.3f;
         arrow.enabled = visible;
         if (!visible) return;
-        direction.Normalize();
+        direction = new Vector2(direction.x / length, direction.y / length);
         var position = from + direction * Distance;
         arrow.transform.position = new Vector3(position.x, position.y, -1f);
-        arrow.transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+        arrow.transform.rotation = Quaternion.Euler(0f, 0f, (float)(System.Math.Atan2(direction.y, direction.x) * 180.0 / System.Math.PI));
         arrow.color = color;
     }
 

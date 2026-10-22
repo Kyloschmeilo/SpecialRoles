@@ -8,9 +8,9 @@ internal static class Colors
     /// <summary>„RRGGBB“ → Farbe (ungültig = weiß).</summary>
     public static Color FromHex(string hex, float alpha = 1f)
     {
-        if (!ColorUtility.TryParseHtmlString("#" + hex, out var color)) color = Color.white;
-        color.a = alpha;
-        return color;
+        if (hex.Length != 6 || !uint.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out var rgb))
+            return new Color(1f, 1f, 1f, alpha);
+        return new Color(((rgb >> 16) & 0xFF) / 255f, ((rgb >> 8) & 0xFF) / 255f, (rgb & 0xFF) / 255f, alpha);
     }
 
     public static Color Of(RoleId role, float alpha = 1f) => FromHex(RoleCatalog.Get(role)?.Color ?? "FFFFFF", alpha);

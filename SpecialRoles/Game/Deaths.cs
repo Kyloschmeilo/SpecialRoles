@@ -6,7 +6,7 @@ using UnityEngine;
 namespace SpecialRoles.Game;
 
 /// <summary>
-/// Wer wann wo gestorben ist (alle Clients, aus MurderPlayer). Für das Medium auch der Weg des Mörders kurz davor.
+/// Wer wann wo gestorben ist (alle Clients, aus MurderPlayer + Die). Für das Medium auch der Weg des Mörders kurz davor.
 /// Bei Kills ohne Teleport (Biss, Bombe …) „tötet sich“ das Opfer im Spiel selbst – dann zählt, wer gebissen bzw.
 /// die Bombe angeklebt hat (die RPCs gehen an alle, wie ein normaler Kill im Spiel auch).
 /// </summary>
@@ -19,6 +19,7 @@ internal static class Deaths
 
     private static readonly Dictionary<byte, Death> ByVictim = new();
     private static readonly Dictionary<byte, byte> Blame = new();
+    private static readonly Dictionary<byte, byte> PendingKiller = new();
     private static readonly Dictionary<byte, RoleTypes> RoleBefore = new();
 
     public static Death? Of(byte victim) => ByVictim.TryGetValue(victim, out var death) ? death : null;
@@ -36,12 +37,16 @@ internal static class Deaths
             RoleBefore[player.PlayerId] = player.Data.RoleType;
     }
 
-    /// <summary>MurderPlayer-Postfix (alle Clients).</summary>
-    public static void OnMurder(PlayerControl killer, PlayerControl victim)
+    /// <summary>MurderPlayer-Prefix (alle Clients): Täter merken, gestorben wird in Die (je nach Spielversion verzögert).</summary>
+    public static void BeforeMurder(PlayerControl killer, PlayerControl victim) => PendingKiller[victim.PlayerId] = killer.PlayerId;
+
+    /// <summary>Die-Postfix (alle Clients).</summary>
+    public static void OnDied(PlayerControl victim, DeathReason reason)
     {
-        if (victim.Data == null || !victim.Data.IsDead) return; // abgewehrt
+        var hadKiller = PendingKiller.Remove(victim.PlayerId, out var pending);
+        if (reason != DeathReason.Kill) return;
         byte? killerId = null;
-        if (killer.PlayerId != victim.PlayerId) killerId = killer.PlayerId;
+        if (hadKiller && pending != victim.PlayerId) killerId = pending;
         else if (Blame.TryGetValue(victim.PlayerId, out var blamed)) killerId = blamed;
         Blame.Remove(victim.PlayerId);
         var now = Time.time;
@@ -60,6 +65,7 @@ internal static class Deaths
     {
         ByVictim.Clear();
         Blame.Clear();
+        PendingKiller.Clear();
         RoleBefore.Clear();
     }
 }

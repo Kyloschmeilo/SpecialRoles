@@ -15,7 +15,7 @@ internal static class Distribution
         var options = GameOptionsManager.Instance?.CurrentGameOptions;
         if (options == null || options.GameMode is not (GameModes.Normal or GameModes.NormalFools))
         {
-            RoleState.Reset();
+            Round.NewGame();
             return; // Hide & Seek: keine Mod-Rollen
         }
 

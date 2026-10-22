@@ -172,3 +172,66 @@ public class CatalogTests
         Assert.All(SettingCatalog.All.Where(s => s.Role != RoleId.None), s => Assert.Equal(RoleCatalog.Get(s.Role)!.Name, s.Section));
     }
 }
+
+public class PngTests
+{
+    [Fact]
+    public void EncodesRgbaImageThatInflatesBack()
+    {
+        var rgba = new byte[] { 255, 0, 0, 255, 0, 255, 0, 128, 0, 0, 255, 0, 255, 255, 255, 255, 1, 2, 3, 4, 5, 6, 7, 8 };
+        var png = Png.Encode(3, 2, rgba);
+
+        Assert.Equal(new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A }, png[..8]);
+        var chunks = Chunks(png);
+        Assert.Equal(new[] { "IHDR", "IDAT", "IEND" }, chunks.Select(c => c.Type));
+
+        var header = chunks[0].Data;
+        Assert.Equal(3, ReadInt(header, 0));
+        Assert.Equal(2, ReadInt(header, 4));
+        Assert.Equal(8, header[8]);
+        Assert.Equal(6, header[9]);
+
+        using var inflate = new System.IO.Compression.ZLibStream(new System.IO.MemoryStream(chunks[1].Data),
+            System.IO.Compression.CompressionMode.Decompress);
+        using var raw = new System.IO.MemoryStream();
+        inflate.CopyTo(raw);
+        var expected = new List<byte>();
+        for (var y = 0; y < 2; y++)
+        {
+            expected.Add(0);
+            expected.AddRange(rgba.Skip(y * 12).Take(12));
+        }
+        Assert.Equal(expected.ToArray(), raw.ToArray());
+    }
+
+    private static int ReadInt(byte[] data, int offset) =>
+        (data[offset] << 24) | (data[offset + 1] << 16) | (data[offset + 2] << 8) | data[offset + 3];
+
+    private static List<(string Type, byte[] Data)> Chunks(byte[] png)
+    {
+        var result = new List<(string, byte[])>();
+        var pos = 8;
+        while (pos < png.Length)
+        {
+            var length = ReadInt(png, pos);
+            var type = System.Text.Encoding.ASCII.GetString(png, pos + 4, 4);
+            var data = png[(pos + 8)..(pos + 8 + length)];
+            var crc = (uint)ReadInt(png, pos + 8 + length);
+            Assert.Equal(Crc32(png[(pos + 4)..(pos + 8 + length)]), crc);
+            result.Add((type, data));
+            pos += 12 + length;
+        }
+        return result;
+    }
+
+    private static uint Crc32(byte[] data)
+    {
+        var crc = 0xFFFFFFFFu;
+        foreach (var b in data)
+        {
+            crc ^= b;
+            for (var k = 0; k < 8; k++) crc = (crc & 1) != 0 ? 0xEDB88320u ^ (crc >> 1) : crc >> 1;
+        }
+        return crc ^ 0xFFFFFFFFu;
+    }
+}

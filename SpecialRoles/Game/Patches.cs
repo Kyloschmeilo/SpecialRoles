@@ -36,7 +36,11 @@ internal static class HandleRpcPatch
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CoBegin))]
 internal static class IntroPatch
 {
-    public static void Prefix() => Safe.Run(Hud.Reset);
+    public static void Prefix()
+    {
+        Safe.Run(Hud.Reset);
+        Safe.Run(Jester.Reset); // Narr-Sieg der letzten Runde ist spätestens jetzt vorbei
+    }
 }
 
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
@@ -130,10 +134,10 @@ internal static class CmdCheckMurderPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
 internal static class MurderPlayerPatch
 {
-    public static void Postfix(PlayerControl __instance, PlayerControl __0)
+    public static void Prefix(PlayerControl __instance, PlayerControl __0)
     {
         if (__0 == null) return;
-        Safe.Run(() => Deaths.OnMurder(__instance, __0));
+        Safe.Run(() => Deaths.BeforeMurder(__instance, __0));
     }
 }
 
@@ -142,7 +146,11 @@ internal static class DiePatch
 {
     public static void Prefix(PlayerControl __instance) => Safe.Run(() => Deaths.BeforeDie(__instance));
 
-    public static void Postfix(PlayerControl __instance, DeathReason __0) => Safe.Run(() => Oracle.OnDeath(__instance, __0));
+    public static void Postfix(PlayerControl __instance, DeathReason __0)
+    {
+        Safe.Run(() => Deaths.OnDied(__instance, __0));
+        Safe.Run(() => Oracle.OnDeath(__instance, __0));
+    }
 }
 
 /// <summary>Host: vor jedem Meeting sterben alle vom Vampir Gebissenen.</summary>

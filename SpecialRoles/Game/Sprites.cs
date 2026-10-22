@@ -1,4 +1,5 @@
 using System;
+using SpecialRoles.Core;
 using UnityEngine;
 
 namespace SpecialRoles.Game;
@@ -55,22 +56,25 @@ internal static class Sprites
     /// <param name="alpha">x/y von -1 bis 1 → Deckkraft 0–1.</param>
     private static Sprite Draw(Func<float, float, float> alpha)
     {
-        var texture = new Texture2D(Size, Size, TextureFormat.RGBA32, false)
+        // oberste Bildzeile zuerst (PNG); y wächst nach oben wie in Unity
+        var rgba = new byte[Size * Size * 4];
+        for (var row = 0; row < Size; row++)
+        for (var px = 0; px < Size; px++)
+        {
+            var py = Size - 1 - row;
+            var x = (px + 0.5f) / Size * 2f - 1f;
+            var y = (py + 0.5f) / Size * 2f - 1f;
+            var i = (row * Size + px) * 4;
+            rgba[i] = rgba[i + 1] = rgba[i + 2] = 255;
+            rgba[i + 3] = (byte)(255 * Math.Clamp(alpha(x, y), 0f, 1f));
+        }
+        var texture = new Texture2D(2, 2, TextureFormat.RGBA32, false)
         {
             wrapMode = TextureWrapMode.Clamp,
             filterMode = FilterMode.Bilinear,
             hideFlags = HideFlags.HideAndDontSave,
         };
-        var pixels = new Color32[Size * Size];
-        for (var py = 0; py < Size; py++)
-        for (var px = 0; px < Size; px++)
-        {
-            var x = (px + 0.5f) / Size * 2f - 1f;
-            var y = (py + 0.5f) / Size * 2f - 1f;
-            pixels[py * Size + px] = new Color32(255, 255, 255, (byte)(255 * Math.Clamp(alpha(x, y), 0f, 1f)));
-        }
-        texture.SetPixels32(pixels);
-        texture.Apply();
+        ImageConversion.LoadImage(texture, Png.Encode(Size, Size, rgba), false);
         var sprite = Sprite.Create(texture, new Rect(0, 0, Size, Size), new Vector2(0.5f, 0.5f), Size);
         sprite.hideFlags = HideFlags.HideAndDontSave;
         return sprite;
