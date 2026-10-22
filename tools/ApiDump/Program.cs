@@ -13,12 +13,13 @@ if (args.Length < 2)
 
 var gameDir = args[0];
 var paths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+// Laufzeit zuerst: mscorlib/System.* der Spiel-Pakete sind teils alte Fassaden, mit denen Enums nicht auflösbar sind
+foreach (var file in Directory.EnumerateFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll"))
+    paths.TryAdd(Path.GetFileName(file), file);
 foreach (var file in Directory.EnumerateFiles(gameDir, "*.dll"))
     paths.TryAdd(Path.GetFileName(file), file);
 foreach (var dir in args.Skip(2).Where(Directory.Exists))
 foreach (var file in Directory.EnumerateFiles(dir, "*.dll", SearchOption.AllDirectories))
-    paths.TryAdd(Path.GetFileName(file), file);
-foreach (var file in Directory.EnumerateFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll"))
     paths.TryAdd(Path.GetFileName(file), file);
 
 using var context = new MetadataLoadContext(new PathAssemblyResolver(paths.Values), "System.Private.CoreLib");
