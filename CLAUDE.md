@@ -56,7 +56,7 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 ## Stand / offen
 - 0.1.0 (17.10.2026, Pre-Release auf GitHub seit 18.10.): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash.
   Von Kilian getestet: „alles klappt“ (22.10.2026).
-- 0.2.0 (22.10.2026, Branch `main`, noch **nicht** veröffentlicht): alle 30 Rollen. Baut auf GitHub, **noch nie im
+- 0.2.0 (22.10.2026, Pre-Release auf GitHub seit 22.10.): alle 30 Rollen. Baut auf GitHub, **noch nie im
   Spiel gelaufen** – nächster Schritt ist ein Testabend (Checkliste je Rolle; TestLab-Bots helfen für Einzeltests).
 - Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
   oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
