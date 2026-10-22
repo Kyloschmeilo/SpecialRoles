@@ -82,7 +82,10 @@ public static class RpcIds
     /// <summary>Mechaniker → Host: alle Sabotagen reparieren.</summary>
     public const byte MechanicFix = 233;
 
-    public static bool IsOurs(byte callId) => callId is >= SetRoles and <= MechanicFix;
+    /// <summary>Host → alle: Kill von PlayerId auf PlayerId wurde abgewehrt (der Angreifer bekommt seinen Kill-Cooldown).</summary>
+    public const byte KillBlocked = 234;
+
+    public static bool IsOurs(byte callId) => callId is >= SetRoles and <= KillBlocked;
 }
 
 /// <summary>Was einen tödlichen Angriff abgewehrt hat (geht mit <see cref="RpcIds.ShieldBroken"/> übers Netz).</summary>

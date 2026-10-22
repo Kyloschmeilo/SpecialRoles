@@ -67,6 +67,29 @@ internal static class Attack
         OnProtected(targetId, kind);
     }
 
+    /// <summary>
+    /// Host: ein normaler Kill wurde abgewehrt. Den Kill-Timer führt der Client des Angreifers selbst, darum geht es an
+    /// alle und nur der Angreifer setzt ihn (RpcMurderPlayer mit „nicht geklappt“ macht im Spiel gar nichts).
+    /// </summary>
+    public static void SendKillBlocked(PlayerControl killer, PlayerControl target)
+    {
+        Net.Send(RpcIds.KillBlocked, writer =>
+        {
+            writer.Write(killer.PlayerId);
+            writer.Write(target.PlayerId);
+        });
+        OnKillBlocked(killer.PlayerId);
+    }
+
+    /// <summary>Alle Clients: der Angreifer bekommt den vollen Kill-Cooldown und erfährt nur, dass es nicht geklappt hat.</summary>
+    public static void OnKillBlocked(byte killerId)
+    {
+        var local = PlayerControl.LocalPlayer;
+        if (local == null || local.PlayerId != killerId) return;
+        local.SetKillTimer(Players.KillCooldown());
+        Notify.Show("<color=#FF4040>Dein Kill hat nicht geklappt.</color>");
+    }
+
     /// <summary>Alle Clients.</summary>
     public static void OnProtected(byte targetId, Protection kind)
     {

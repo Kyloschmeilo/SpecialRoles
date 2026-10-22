@@ -47,6 +47,9 @@ internal abstract class RoleButton
     /// <summary>false = Use setzt den Timer selbst (z.B. erst nach Ende einer Wirkung).</summary>
     protected virtual bool CooldownAfterUse => true;
 
+    /// <summary>false = auch benutzbar, wenn der Spieler gerade festgehalten wird (Kameramann beim Durchschauen).</summary>
+    protected virtual bool NeedsMovement => true;
+
     public void Reset()
     {
         if (_button != null) Object.Destroy(_button.gameObject);
@@ -100,7 +103,7 @@ internal abstract class RoleButton
 
         var target = FindTarget(local);
         _button.SetTarget(target);
-        var ready = Timer <= 0f && HasTarget(local, target) && local.CanMove;
+        var ready = Timer <= 0f && HasTarget(local, target) && CanAct(local);
         _button.SetCoolDown(Timer, Math.Max(Cooldown, 0.01f));
         if (ready) _button.SetEnabled();
         else _button.SetDisabled();
@@ -116,9 +119,12 @@ internal abstract class RoleButton
         (hud.UseButton != null && hud.UseButton.isActiveAndEnabled) ||
         (hud.PetButton != null && hud.PetButton.isActiveAndEnabled);
 
+    private bool CanAct(PlayerControl local) =>
+        local.CanMove || (!NeedsMovement && Minigame.Instance == null && !Players.InMeeting);
+
     private void Click(PlayerControl local)
     {
-        if (Timer > 0f || !local.CanMove || !Visible(local)) return;
+        if (Timer > 0f || !CanAct(local) || !Visible(local)) return;
         var target = FindTarget(local);
         if (!HasTarget(local, target)) return;
         Use(local, target);

@@ -18,7 +18,7 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 - `Core/` – spielunabhängig, auch von `Tests/` kompiliert: `Roles.cs` (`RoleId` – Werte gehen übers Netz, nie
   ändern; `RoleCatalog` mit `Implemented`-Flag: nur fertige Rollen werden vergeben/haben Config),
   `RoundSettings.cs` (`SettingId` + `SettingCatalog`: alle Rollen-Einstellungen mit Standard/Min/Max, Config-Abschnitt
-  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–233, `RoleSync` v2 = Rollen + Einstellungen
+  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–234, `RoleSync` v2 = Rollen + Einstellungen
   als Liste (Id, Wert), unbekannte Ids werden ignoriert), `Png.cs` (Bilder als PNG für `ImageConversion.LoadImage`).
 - `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Round.cs` (läuft jeden
   Frame aus HudManager.Update: Meeting-Beginn/-Ende, alle Rollen-Updates, `EndGame`/`NewGame`), `Net.cs` (eigene RPCs
@@ -56,8 +56,13 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 ## Stand / offen
 - 0.1.0 (17.10.2026, Pre-Release auf GitHub seit 18.10.): Grundgerüst + Sheriff, Putzkraft, Nachtsicht, Flash.
   Von Kilian getestet: „alles klappt“ (22.10.2026).
-- 0.2.0 (22.10.2026, Pre-Release auf GitHub seit 22.10.): alle 30 Rollen. Baut auf GitHub, **noch nie im
-  Spiel gelaufen** – nächster Schritt ist ein Testabend (Checkliste je Rolle; TestLab-Bots helfen für Einzeltests).
+- 0.2.0 (22.10.2026, Pre-Release auf GitHub): alle 30 Rollen. Am selben Abend lokal mit TestLab getestet (8 Spieler,
+  Bericht `/mnt/project-files/rollen-mod/testlab-test-0.2.0.md`): alle Grundfunktionen laufen, 6 Fehler gefunden.
+- 0.2.1 (22.10.2026, auf `main`, noch nicht veröffentlicht): behebt sie – Knöpfe auch neben dem Haustier-Knopf sichtbar,
+  Übersetzer im Knopf-Klon aus (sonst „KILL“/„ACID“), abgewehrter Kill → RPC `KillBlocked` setzt dem Angreifer den
+  Kill-Cooldown (`RpcMurderPlayer(target, false)` macht im Spiel nichts!), Kameramann-Knopf geht beim Durchschauen
+  (`NeedsMovement`), Hacker steht still (Karte schließt sonst beim Laufen), Tarner blendet `nameText` aus.
+  Noch offen: echter Testabend („Hacking“-Kicks, was andere Clients sehen).
 - Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
   oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,

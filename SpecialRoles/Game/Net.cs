@@ -156,6 +156,13 @@ internal static class Net
             case RpcIds.MechanicFix:
                 if (amHost) Mechanic.HostRepair(sender);
                 break;
+            case RpcIds.KillBlocked:
+            {
+                var killer = reader.ReadByte();
+                reader.ReadByte(); // Ziel – für spätere Anzeigen
+                if (fromHost) Attack.OnKillBlocked(killer);
+                break;
+            }
         }
     }
 

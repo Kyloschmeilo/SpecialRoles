@@ -99,7 +99,7 @@ internal static class NameTag
     }
 }
 
-/// <summary>Im Meeting: „erpresst“ bzw. das vom Orakel verratene Team hinter dem Namen (für alle sichtbar).</summary>
+/// <summary>Im Meeting: „erpresst“ bzw. das vom Orakel verratene Team in Klammern hinter dem Namen (für alle sichtbar).</summary>
 internal static class MeetingTags
 {
     public static void Update()
@@ -117,9 +117,10 @@ internal static class MeetingTags
             if (oracle.Length > 0) tags.Add(oracle);
             if (tags.Count == 0) continue;
 
-            var line = $"\n<size=70%>{string.Join(" · ", tags)}</size>";
+            // in derselben Zeile wie der Name – darunter steht im Farbenblind-Modus der Farbname
+            var line = $" <size=60%>({string.Join(", ", tags)})</size>";
             var text = area.NameText.text ?? "";
-            var cut = text.IndexOf("\n<size=70%>", System.StringComparison.Ordinal);
+            var cut = text.IndexOf(" <size=60%>(", System.StringComparison.Ordinal);
             if (cut >= 0) text = text[..cut];
             if (area.NameText.text != text + line) area.NameText.text = text + line;
         }

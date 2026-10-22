@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SpecialRoles.Core;
 using SpecialRoles.Game;
 using UnityEngine;
@@ -16,6 +17,7 @@ internal static class Camouflager
     private static float _until = -1f;
     private static float _nextApply;
     private static bool _applied;
+    private static readonly HashSet<byte> HiddenNames = new();
 
     public static bool Active => _until >= 0f;
 
@@ -59,7 +61,13 @@ internal static class Camouflager
         {
             if (player.Data == null || player.Data.IsDead) continue;
             player.RawSetColor(Gray);
-            player.RawSetName("");
+            // RawSetName("") zeigt „Player“ – den Namen stattdessen ausblenden
+            var name = player.cosmetics != null ? player.cosmetics.nameText : null;
+            if (name != null && name.gameObject.activeSelf)
+            {
+                name.gameObject.SetActive(false);
+                HiddenNames.Add(player.PlayerId);
+            }
             player.RawSetHat(CosmeticsLayer.EMPTY_HAT_ID, Gray);
             player.RawSetSkin(CosmeticsLayer.EMPTY_SKIN_ID, Gray);
             player.RawSetVisor(CosmeticsLayer.EMPTY_VISOR_ID, Gray);
@@ -74,8 +82,15 @@ internal static class Camouflager
         if (!_applied) return;
         _applied = false;
         foreach (var player in Players.All())
+        {
+            // nur die Namen wieder zeigen, die wir versteckt haben – und keinen Geister-Namen für Lebende
+            var name = player.cosmetics != null ? player.cosmetics.nameText : null;
+            var ghostHiddenForMe = player.Data != null && player.Data.IsDead && Players.IsAlive(PlayerControl.LocalPlayer);
+            if (name != null && HiddenNames.Contains(player.PlayerId) && !ghostHiddenForMe) name.gameObject.SetActive(true);
             if (player.Data != null && player.CurrentOutfit != null)
                 player.RawSetOutfit(player.CurrentOutfit, player.CurrentOutfitType);
+        }
+        HiddenNames.Clear();
     }
 
     public static void Reset()

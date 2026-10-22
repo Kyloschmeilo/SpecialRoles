@@ -3,7 +3,7 @@
 Eine BepInEx-Mod für **Among Us auf Steam (64-Bit)** mit 30 neuen Rollen: 17 für die Crew, 11 für Impostor und
 2 neutrale, dazu den Modifikator **Flash**. Alle Rollen erklärt der Discord-Bot mit `/special-rolle`.
 
-> **Stand 0.2.0:** alle 30 Rollen sind eingebaut, aber noch nicht im echten Spiel mit mehreren Leuten getestet.
+> **Stand 0.2.1:** alle 30 Rollen sind eingebaut und lokal getestet, aber noch nicht im echten Spiel mit mehreren Leuten.
 
 ## Installieren
 

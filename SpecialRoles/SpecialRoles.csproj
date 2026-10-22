@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <AssemblyName>SpecialRoles</AssemblyName>
         <RootNamespace>SpecialRoles</RootNamespace>
-        <Version>0.2.0</Version>
+        <Version>0.2.1</Version>
         <!-- Keinen Git-Commit an die Version hängen ("0.1.0+abc123") – ein späterer Updater vergleicht Versionen -->
         <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <DebugType>embedded</DebugType>

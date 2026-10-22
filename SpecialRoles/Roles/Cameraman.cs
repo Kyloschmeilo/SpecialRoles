@@ -44,6 +44,7 @@ internal static class Cameraman
         protected override KeyCode Key => KeyCode.G;
         protected override float Cooldown => RoleState.Settings.Get(SettingId.CameramanCooldown);
         protected override bool CooldownAfterUse => false;
+        protected override bool NeedsMovement => _viewing < 0; // beim Durchschauen steht man fest, „Nächste“ muss gehen
         protected override bool Visible(PlayerControl local) => Players.IsAlive(local) && Cams.Count > 0;
         protected override bool HasTarget(PlayerControl local, PlayerControl? target) => true;
 

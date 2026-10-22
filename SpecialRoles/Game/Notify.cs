@@ -52,14 +52,15 @@ internal static class Notify
         text.name = "SpecialRoles_Hinweis";
         var translator = text.GetComponent<TextTranslatorTMP>();
         if (translator != null) Object.Destroy(translator);
-        text.transform.localPosition = new Vector3(0f, 1.9f, -50f);
+        // schmal und etwas tiefer, damit lange Hinweise nicht in den Reiter „Tasks“ oben links laufen
+        text.transform.localPosition = new Vector3(0f, 1.6f, -50f);
         text.transform.localScale = Vector3.one;
         text.enableAutoSizing = false;
-        text.fontSize = 2.6f;
+        text.fontSize = 2.2f;
         text.alignment = TextAlignmentOptions.Center;
-        text.enableWordWrapping = false;
+        text.enableWordWrapping = true;
         text.overflowMode = TextOverflowModes.Overflow;
-        text.rectTransform.sizeDelta = new Vector2(10f, 2f);
+        text.rectTransform.sizeDelta = new Vector2(5.5f, 2f);
         _text = text;
         return text;
     }

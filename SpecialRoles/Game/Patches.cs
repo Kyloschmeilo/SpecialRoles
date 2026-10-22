@@ -88,8 +88,8 @@ internal static class LightRadiusPatch
 // ---------- Kills, Tod, Wiederbeleben ----------
 
 /// <summary>
-/// Host prüft jeden normalen Kill: wachsamer Veteran → der Angreifer stirbt; Schild/Glück/Armor → Kill scheitert
-/// (wie beim Schutzengel: der Angreifer sieht den Schild).
+/// Host prüft jeden normalen Kill: wachsamer Veteran → der Angreifer stirbt; Schild/Glück/Armor → Kill scheitert,
+/// der Angreifer bekommt trotzdem seinen Kill-Cooldown (sonst drückt er einfach nochmal).
 /// </summary>
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
 internal static class CheckMurderPatch
@@ -102,7 +102,7 @@ internal static class CheckMurderPatch
             if (!Players.IsImpostor(__instance) || Players.IsImpostor(__0)) return true; // das Spiel lehnt das selbst ab
             if (!Attack.Contact(__instance, __0)) return false;
             if (Attack.Lethal(__0)) return true;
-            __instance.RpcMurderPlayer(__0, false);
+            Attack.SendKillBlocked(__instance, __0);
             return false;
         }
         catch (Exception exc)
