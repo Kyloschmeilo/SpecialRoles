@@ -1,0 +1,29 @@
+# Nur für Cloud-Sitzungen: zeigt Signaturen von Spiel-Typen (die Spiel-DLLs gibt es nur über nuget.bepinex.dev,
+# das von dort gesperrt ist). Actions → „API-Dump“ → Typen eingeben; die Ausgabe steht im Job-Log.
+name: API-Dump
+
+on:
+  workflow_dispatch:
+    inputs:
+      types:
+        description: "Typen, durch Leerzeichen getrennt (Name = alle Member, *Muster* = Typen suchen, Typ.Muster* = Member suchen)"
+        required: true
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - name: Mod bauen (lädt die Spiel-DLLs)
+        run: dotnet build SpecialRoles -c Release -p:AmongUs=/nicht-kopieren
+      - name: Typen ausgeben
+        env:
+          TYPES: ${{ inputs.types }}
+        run: |
+          dll=$(find ~/.cache/bepinex ~/.nuget/packages/amongus.gamelibs.steam -name Assembly-CSharp.dll 2>/dev/null | head -1)
+          echo "Spiel-DLLs: $(dirname "$dll")"
+          ls "$(dirname "$dll")"
+          dotnet run --project tools/ApiDump -c Release -- "$(dirname "$dll")" "$TYPES" ~/.nuget/packages ~/.cache/bepinex

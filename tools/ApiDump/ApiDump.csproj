@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Hilfsprogramm für die Cloud (Workflow „API-Dump“): zeigt Signaturen von Spiel-Typen, ohne das Spiel zu haben -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Reflection.MetadataLoadContext" Version="8.0.1" />
+    </ItemGroup>
+
+</Project>
