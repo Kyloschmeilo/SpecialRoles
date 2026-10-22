@@ -14,6 +14,8 @@ internal abstract class RoleButton
     private KillButton? _button;
     private bool _wasInMeeting;
     private string _shownLabel = "";
+    private string _appliedText = "";
+    private Sprite? _sprite;
 
     protected float Timer { get; set; }
 
@@ -39,7 +41,7 @@ internal abstract class RoleButton
 
     protected abstract void Use(PlayerControl local, PlayerControl? target);
 
-    /// <summary>Bild des Knopfs; null = Kill-Bild behalten.</summary>
+    /// <summary>Bild des Knopfs; null = normales Kill-Bild.</summary>
     protected virtual Sprite? Icon(HudManager hud) => null;
 
     /// <summary>false = Use setzt den Timer selbst (z.B. erst nach Ende einer Wirkung).</summary>
@@ -52,6 +54,8 @@ internal abstract class RoleButton
         Timer = Cooldown;
         _wasInMeeting = false;
         _shownLabel = "";
+        _appliedText = "";
+        _sprite = null;
     }
 
     /// <summary>Cooldown von außen setzen (z.B. Schild gebrochen, Wirkung vorbei).</summary>
@@ -72,16 +76,22 @@ internal abstract class RoleButton
         if (_wasInMeeting && !inMeeting) Timer = Cooldown; // nach jedem Meeting voller Cooldown, wie beim Kill
         _wasInMeeting = inMeeting;
 
-        var visible = !inMeeting && Visible(local) && hud.UseButton != null && hud.UseButton.isActiveAndEnabled;
+        var visible = !inMeeting && Visible(local) && HudShown(hud);
         _button.gameObject.SetActive(visible);
         if (!visible) return;
 
+        // Text und Bild jeden Frame prüfen: der Klon setzt beim Start die Kill-Beschriftung und das aktuelle Kill-Bild
+        // (z.B. „ACID“ nach einer Viper-Runde) zurück
         var label = Label;
-        if (label != _shownLabel)
+        var labelText = _button.buttonLabelText;
+        if (label != _shownLabel || (labelText != null && labelText.text != _appliedText))
         {
             _button.OverrideText(label);
             _shownLabel = label;
+            _appliedText = labelText != null ? labelText.text : "";
         }
+        if (_sprite != null && _button.graphic != null && _button.graphic.sprite != _sprite)
+            _button.graphic.sprite = _sprite;
 
         if (SharesKillTimer)
             Timer = local.killTimer;
@@ -98,6 +108,14 @@ internal abstract class RoleButton
         if (ready && Input.GetKeyDown(Key)) Click(local);
     }
 
+    /// <summary>
+    /// Ob die Spiel-Knöpfe gerade zu sehen sind. Unten rechts steht je nach Lage der Benutzen- oder der Haustier-Knopf
+    /// (ohne etwas Benutzbares in der Nähe), darum reicht einer von beiden.
+    /// </summary>
+    private static bool HudShown(HudManager hud) =>
+        (hud.UseButton != null && hud.UseButton.isActiveAndEnabled) ||
+        (hud.PetButton != null && hud.PetButton.isActiveAndEnabled);
+
     private void Click(PlayerControl local)
     {
         if (Timer > 0f || !local.CanMove || !Visible(local)) return;
@@ -113,7 +131,14 @@ internal abstract class RoleButton
         if (template == null) return;
         var button = Object.Instantiate(template, template.transform.parent);
         button.name = "SpecialRoles_" + GetType().Name;
+        // Übersetzer abschalten, sonst schreibt er „KILL“ zurück
+        foreach (var translator in button.GetComponentsInChildren<TextTranslatorTMP>(true))
+            translator.enabled = false;
+        // ohne eigenes Bild das normale Kill-Bild, nicht das gerade eingestellte einer Spielrolle
         var icon = Icon(hud);
+        if (icon == null) icon = template.defaultKillSprite;
+        if (icon == null) icon = button.graphic.sprite;
+        _sprite = icon;
         if (icon != null) button.graphic.sprite = icon;
 
         var passive = button.GetComponent<PassiveButton>();
@@ -128,6 +153,7 @@ internal abstract class RoleButton
         }
         _button = button;
         _shownLabel = "";
+        _appliedText = "";
         SpecialRolesPlugin.Logger.LogInfo($"Knopf \"{Label}\" erstellt (Taste {Key}).");
     }
 }

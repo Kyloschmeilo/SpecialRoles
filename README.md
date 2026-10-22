@@ -32,7 +32,7 @@ Neue Version: Installer einfach nochmal starten. Deinstallieren: Installer start
 | Medic | Crew | F | Gibt einem Spieler einen Schild gegen den nächsten tödlichen Angriff. Bricht er, erfahren es Medic und Geschützter. |
 | Bürgermeister | Crew | – | Seine Stimme zählt doppelt (zweites Stimm-Symbol). |
 | Snitch | Crew | – | Alle Tasks fertig → Pfeile zu den Impostorn. Fehlt ihm nur noch ein Task, sehen die Impostor einen Pfeil zu ihm. |
-| Hacker | Crew | F | Admin-Karte von überall, man kann dabei laufen. |
+| Hacker | Crew | F | Admin-Karte von überall (man steht dabei still, wie am Admin-Tisch). |
 | Spurenleser | Crew | F | Fußspuren aller Spieler der letzten 10 Sekunden, in ihren Farben. |
 | Fallensteller | Crew | F | Fallen, die nur er sieht. Läuft jemand hinein, erfährt er den Namen. |
 | Medium | Crew | F | Zeigt an einer Leiche (höchstens 60 s alt) grau den Weg des Mörders kurz vor der Tat. |
