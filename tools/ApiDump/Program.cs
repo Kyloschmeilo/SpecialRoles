@@ -29,10 +29,17 @@ foreach (var file in Directory.EnumerateFiles(gameDir, "*.dll").OrderBy(f => f))
     catch (Exception exc) { Console.WriteLine($"# {Path.GetFileName(file)} nicht geladen: {exc.Message}"); }
 }
 
-var types = game.SelectMany(TypesOf).ToList();
+var types = game.SelectMany(TypesOf).Select(t => (Type: t, Full: FullNameOf(t))).Where(t => t.Full != null).ToList();
 Console.WriteLine($"# {game.Count} Assemblies, {types.Count} Typen");
 
 foreach (var query in args[1].Split(new[] { ' ', ',', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+{
+    try { Query(query); }
+    catch (Exception exc) { Console.WriteLine($"=== {query}: Fehler {exc.GetType().Name}: {exc.Message}"); }
+}
+return 0;
+
+void Query(string query)
 {
     Console.WriteLine();
     var dot = query.LastIndexOf('.');
@@ -47,24 +54,23 @@ foreach (var query in args[1].Split(new[] { ' ', ',', '\n' }, StringSplitOptions
                          .Where(m => pattern.IsMatch(m.Name)))
                 Console.WriteLine("  " + Describe(member));
         }
-        continue;
+        return;
     }
     if (query.IndexOfAny(new[] { '*', '?' }) >= 0)
     {
         var pattern = Wildcard(query);
         Console.WriteLine($"=== Suche {query}");
-        foreach (var type in types.Where(t => pattern.IsMatch(t.Name) || pattern.IsMatch(t.FullName ?? "")).Take(200))
-            Console.WriteLine($"  {type.Assembly.GetName().Name}: {type.FullName}");
-        continue;
+        foreach (var (type, full) in types.Where(t => pattern.IsMatch(t.Type.Name) || pattern.IsMatch(t.Full!)).Take(200))
+            Console.WriteLine($"  {type.Assembly.GetName().Name}: {full}");
+        return;
     }
     var found = Find(query).ToList();
     if (found.Count == 0) Console.WriteLine($"=== {query}: nicht gefunden");
     foreach (var type in found) Dump(type);
 }
-return 0;
 
 IEnumerable<Type> Find(string name) =>
-    types.Where(t => t.Name == name || t.FullName == name || t.FullName?.Replace('+', '.') == name);
+    types.Where(t => t.Type.Name == name || t.Full == name || t.Full!.Replace('+', '.') == name).Select(t => t.Type);
 
 void Dump(Type type)
 {
@@ -138,6 +144,12 @@ static string Name(Type type)
     var tick = name.IndexOf('`');
     if (tick >= 0) name = name[..tick];
     return name + "<" + string.Join(", ", type.GetGenericArguments().Select(Name)) + ">";
+}
+
+static string? FullNameOf(Type type)
+{
+    try { return type.FullName; }
+    catch { return null; } // kaputte Metadaten in manchen DLLs
 }
 
 static Type? SafeBase(Type type)
