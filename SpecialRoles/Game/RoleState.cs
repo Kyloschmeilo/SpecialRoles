@@ -22,9 +22,10 @@ internal static class RoleState
     public static bool LocalHas(Modifier modifier) =>
         PlayerControl.LocalPlayer != null && Has(PlayerControl.LocalPlayer.PlayerId, modifier);
 
+    /// <summary>Neue Runde: Rollen vom Host übernehmen und alles Rundenwissen der Rollen zurücksetzen.</summary>
     public static void Apply(RoleSync sync)
     {
-        Reset();
+        Round.NewGame();
         Settings = sync.Settings;
         foreach (var a in sync.Assignments)
         {
@@ -35,6 +36,13 @@ internal static class RoleState
         SpecialRolesPlugin.Logger.LogInfo(
             $"Rollen erhalten: {Roles.Count} Rollen, {Modifiers.Count} Modifikatoren. Deine Rolle: {RoleCatalog.Get(local)?.Name ?? "keine"}" +
             (LocalHas(Modifier.Flash) ? " + Flash" : ""));
+    }
+
+    /// <summary>Rolle mitten im Spiel ändern (Vergesslicher).</summary>
+    public static void SetRole(byte playerId, RoleId role)
+    {
+        if (role == RoleId.None) Roles.Remove(playerId);
+        else Roles[playerId] = role;
     }
 
     public static void Reset()

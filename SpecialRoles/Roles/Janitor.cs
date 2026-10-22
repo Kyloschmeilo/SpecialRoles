@@ -1,14 +1,13 @@
 using SpecialRoles.Core;
 using SpecialRoles.Game;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace SpecialRoles.Roles;
 
 /// <summary>Putzkraft (Impostor): lässt eine Leiche in Reichweite verschwinden; teilt sich den Cooldown mit dem Kill.</summary>
 internal static class Janitor
 {
-    private const float Range = 1.8f;
+    public static readonly CleanButton Button = new();
 
     internal sealed class CleanButton : RoleButton
     {
@@ -34,23 +33,7 @@ internal static class Janitor
         }
     }
 
-    private static DeadBody? ClosestBody(PlayerControl local)
-    {
-        DeadBody? best = null;
-        var bestDistance = Range;
-        var position = local.GetTruePosition();
-        foreach (var body in Object.FindObjectsOfType<DeadBody>())
-        {
-            if (body == null || body.Reported) continue;
-            var distance = Vector2.Distance(position, body.TruePosition);
-            if (distance <= bestDistance)
-            {
-                best = body;
-                bestDistance = distance;
-            }
-        }
-        return best;
-    }
+    private static DeadBody? ClosestBody(PlayerControl local) => Bodies.Closest(local.GetTruePosition());
 
     public static void OnCleanReceived(PlayerControl sender, byte bodyId)
     {
@@ -58,10 +41,5 @@ internal static class Janitor
         RemoveBody(bodyId);
     }
 
-    private static void RemoveBody(byte bodyId)
-    {
-        foreach (var body in Object.FindObjectsOfType<DeadBody>())
-            if (body != null && body.ParentId == bodyId)
-                Object.Destroy(body.gameObject);
-    }
+    private static void RemoveBody(byte bodyId) => Bodies.Remove(bodyId);
 }

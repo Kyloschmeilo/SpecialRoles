@@ -100,11 +100,17 @@ public class ProtocolTests
     {
         var sync = new RoleSync(
             new[] { new Assignment(3, RoleId.Sheriff, Modifier.None), new Assignment(7, RoleId.Janitor, Modifier.Flash) },
-            new RoundSettings(30f, 1.5f));
+            Settings((SettingId.SheriffCooldown, 30f), (SettingId.FlashSpeed, 1.5f), (SettingId.LuckyChance, 70f)));
         var decoded = RoleSync.Decode(sync.Encode());
         Assert.Equal(sync.Assignments, decoded.Assignments);
         Assert.Equal(sync.Settings, decoded.Settings);
+        Assert.Equal(30f, decoded.Settings.SheriffCooldown);
+        Assert.Equal(70, decoded.Settings.GetInt(SettingId.LuckyChance));
+        Assert.Equal(10f, decoded.Settings.Get(SettingId.VampireDelay)); // Standardwert
     }
+
+    private static RoundSettings Settings(params (SettingId Id, float Value)[] values) =>
+        new(values.Select(v => new KeyValuePair<SettingId, float>(v.Id, v.Value)));
 
     [Fact]
     public void UnknownRolesAndFlagsAreIgnored()
@@ -124,8 +130,21 @@ public class ProtocolTests
     [Fact]
     public void SettingsAreClamped()
     {
-        var data = new RoleSync(Array.Empty<Assignment>(), new RoundSettings(9999f, float.NaN)).Encode();
-        Assert.Equal(new RoundSettings(120f, 1f), RoleSync.Decode(data).Settings);
+        var data = new RoleSync(Array.Empty<Assignment>(), Settings((SettingId.SheriffCooldown, 9999f), (SettingId.FlashSpeed, float.NaN))).Encode();
+        var settings = RoleSync.Decode(data).Settings;
+        Assert.Equal(120f, settings.SheriffCooldown);
+        Assert.Equal(1f, settings.FlashSpeed);
+    }
+
+    [Fact]
+    public void UnknownSettingsAreIgnored()
+    {
+        // Version 2, keine Rollen, zwei Einstellungen: unbekannte Id 250 und Sheriff-Cooldown 40
+        var data = new byte[] { 2, 0, 2, 250 }.Concat(BitConverter.GetBytes(5f))
+            .Concat(new byte[] { (byte)SettingId.SheriffCooldown }).Concat(BitConverter.GetBytes(40f)).ToArray();
+        var settings = RoleSync.Decode(data).Settings;
+        Assert.Equal(40f, settings.SheriffCooldown);
+        Assert.Equal(RoundSettings.Default.FlashSpeed, settings.FlashSpeed);
     }
 }
 
@@ -141,5 +160,15 @@ public class CatalogTests
         Assert.Equal(30, RoleCatalog.All.Select(r => r.Id).Distinct().Count());
         Assert.Equal(30, RoleCatalog.All.Select(r => r.Name).Distinct().Count());
         Assert.All(RoleCatalog.All, r => Assert.Matches("^[0-9A-F]{6}$", r.Color));
+    }
+
+    [Fact]
+    public void SettingsAreConsistent()
+    {
+        Assert.Equal(SettingCatalog.All.Count, SettingCatalog.All.Select(s => s.Id).Distinct().Count());
+        Assert.Equal(SettingCatalog.All.Count, SettingCatalog.All.Select(s => (s.Section, s.Key)).Distinct().Count());
+        Assert.All(SettingCatalog.All, s => Assert.InRange(s.Default, s.Min, s.Max));
+        // Abschnitt = Rollenname, damit die Config nach Rollen sortiert ist
+        Assert.All(SettingCatalog.All.Where(s => s.Role != RoleId.None), s => Assert.Equal(RoleCatalog.Get(s.Role)!.Name, s.Section));
     }
 }

@@ -2,6 +2,7 @@ using System;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using SpecialRoles.Core;
 using SpecialRoles.Roles;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace SpecialRoles.Game;
 
 // Alle Patches fangen eigene Fehler ab, damit die Mod das Spiel nie kaputt macht.
 // Parameter über die Position (__0, __1 …), damit Namensänderungen im Spiel die Patches nicht brechen.
+// Nur einfache Signaturen patchen (keine Nullable-/Il2Cpp-Listen-Parameter an virtuellen Methoden – siehe CrewStats).
 
 /// <summary>Host: nach der Rollenvergabe des Spiels die Mod-Rollen verteilen. Läuft als Letztes (nach CrewStats).</summary>
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
@@ -40,7 +42,7 @@ internal static class IntroPatch
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
 internal static class HudUpdatePatch
 {
-    public static void Postfix() => Hud.Tick(); // fängt eigene Fehler ab
+    public static void Postfix() => Round.Tick(); // fängt eigene Fehler ab
 }
 
 [HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.SetTaskText))]
@@ -79,21 +81,192 @@ internal static class LightRadiusPatch
     }
 }
 
+// ---------- Kills, Tod, Wiederbeleben ----------
+
+/// <summary>
+/// Host prüft jeden normalen Kill: wachsamer Veteran → der Angreifer stirbt; Schild/Glück/Armor → Kill scheitert
+/// (wie beim Schutzengel: der Angreifer sieht den Schild).
+/// </summary>
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
+internal static class CheckMurderPatch
+{
+    public static bool Prefix(PlayerControl __instance, PlayerControl __0)
+    {
+        try
+        {
+            if (!Players.IsHost || __0 == null || !Players.IsAlive(__instance) || !Players.IsAlive(__0)) return true;
+            if (!Players.IsImpostor(__instance) || Players.IsImpostor(__0)) return true; // das Spiel lehnt das selbst ab
+            if (!Attack.Contact(__instance, __0)) return false;
+            if (Attack.Lethal(__0)) return true;
+            __instance.RpcMurderPlayer(__0, false);
+            return false;
+        }
+        catch (Exception exc)
+        {
+            SpecialRolesPlugin.Logger.LogError($"Kill prüfen: {exc}");
+            return true;
+        }
+    }
+}
+
+/// <summary>Vampir: der eigene Kill-Knopf beißt nur.</summary>
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CmdCheckMurder))]
+internal static class CmdCheckMurderPatch
+{
+    public static bool Prefix(PlayerControl __instance, PlayerControl __0)
+    {
+        try
+        {
+            return !Vampire.TryBite(__instance, __0);
+        }
+        catch (Exception exc)
+        {
+            SpecialRolesPlugin.Logger.LogError($"Vampir: {exc}");
+            return true;
+        }
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
+internal static class MurderPlayerPatch
+{
+    public static void Postfix(PlayerControl __instance, PlayerControl __0)
+    {
+        if (__0 == null) return;
+        Safe.Run(() => Deaths.OnMurder(__instance, __0));
+    }
+}
+
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Die))]
+internal static class DiePatch
+{
+    public static void Prefix(PlayerControl __instance) => Safe.Run(() => Deaths.BeforeDie(__instance));
+
+    public static void Postfix(PlayerControl __instance, DeathReason __0) => Safe.Run(() => Oracle.OnDeath(__instance, __0));
+}
+
+/// <summary>Host: vor jedem Meeting sterben alle vom Vampir Gebissenen.</summary>
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
+internal static class ReportDeadBodyPatch
+{
+    public static void Prefix()
+    {
+        if (Players.IsHost) Safe.Run(Vampire.BeforeMeeting);
+    }
+}
+
+// ---------- Meeting ----------
+
+/// <summary>Host: Bürgermeister-Stimme doppelt zählen.</summary>
+[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CalculateVotes))]
+internal static class CalculateVotesPatch
+{
+    public static void Postfix(MeetingHud __instance, Il2CppSystem.Collections.Generic.Dictionary<byte, int> __result)
+    {
+        if (__result == null) return;
+        Safe.Run(() => Mayor.AddVotes(__instance, __result));
+    }
+}
+
+/// <summary>Alle: zweites Stimm-Symbol für den Bürgermeister.</summary>
+[HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.PopulateResults))]
+internal static class PopulateResultsPatch
+{
+    public static void Postfix(MeetingHud __instance, Il2CppStructArray<MeetingHud.VoterState> __0)
+    {
+        if (__0 == null) return;
+        Safe.Run(() => Mayor.AddVoteIcons(__instance, __0));
+    }
+}
+
+/// <summary>Erpresst: Chat-Senden im Meeting blocken (nur der eigene Client, kein Text geht raus).</summary>
+[HarmonyPatch(typeof(ChatController), nameof(ChatController.SendChat))]
+internal static class SendChatPatch
+{
+    public static bool Prefix() => ChatBlock.Allow();
+}
+
+[HarmonyPatch(typeof(ChatController), nameof(ChatController.SendFreeChat))]
+internal static class SendFreeChatPatch
+{
+    public static bool Prefix() => ChatBlock.Allow();
+}
+
+[HarmonyPatch(typeof(ChatController), nameof(ChatController.SendQuickChat))]
+internal static class SendQuickChatPatch
+{
+    public static bool Prefix() => ChatBlock.Allow();
+}
+
+internal static class ChatBlock
+{
+    public static bool Allow()
+    {
+        try
+        {
+            if (!Blackmailer.LocalSilenced()) return true;
+            Blackmailer.WarnSilenced();
+            return false;
+        }
+        catch (Exception exc)
+        {
+            SpecialRolesPlugin.Logger.LogError($"Chat: {exc}");
+            return true;
+        }
+    }
+}
+
+// ---------- Narr ----------
+
+/// <summary>Host: wird der Narr rausgewählt, gewinnt er.</summary>
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Exiled))]
+internal static class ExiledPatch
+{
+    public static void Prefix(PlayerControl __instance) => Safe.Run(() => Jester.OnExiled(__instance));
+}
+
+/// <summary>Host: solange der Narr-Sieg läuft, kein anderes Spielende.</summary>
+[HarmonyPatch(typeof(LogicGameFlowNormal), nameof(LogicGameFlowNormal.CheckEndCriteria))]
+internal static class CheckEndCriteriaPatch
+{
+    public static bool Prefix() => !Jester.WinPending;
+}
+
+[HarmonyPatch(typeof(ExileController), nameof(ExileController.Begin))]
+internal static class ExileBeginPatch
+{
+    public static void Postfix(ExileController __instance)
+    {
+        Safe.Run(() =>
+        {
+            var text = Jester.ExileText(__instance.initData?.networkedPlayer);
+            if (text != null) __instance.completeString = text;
+        });
+    }
+}
+
+[HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.SetEverythingUp))]
+internal static class EndScreenPatch
+{
+    public static void Postfix(EndGameManager __instance) => Safe.Run(() => Jester.ShowEndScreen(__instance));
+}
+
+// ---------- Spielende ----------
+
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameEnd))]
 internal static class GameEndPatch
 {
-    public static void Prefix() => EndRound();
-
-    internal static void EndRound()
+    public static void Prefix()
     {
-        Safe.Run(Hud.Reset);
-        Safe.Run(Sheriff.Reset);
-        Safe.Run(RoleState.Reset);
+        Safe.Run(Jester.BeforeGameEnd);
+        Round.EndGame();
     }
+
+    public static void Postfix() => Safe.Run(Jester.AfterGameEnd);
 }
 
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.ExitGame))]
 internal static class ExitGamePatch
 {
-    public static void Prefix() => GameEndPatch.EndRound();
+    public static void Prefix() => Round.EndGame();
 }

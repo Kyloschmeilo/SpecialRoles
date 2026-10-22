@@ -14,6 +14,8 @@ internal static class Sheriff
     // Host: letzter Schuss je Sheriff, gegen zu schnelles Feuern (z.B. andere Mod-Version)
     private static readonly Dictionary<byte, float> LastShot = new();
 
+    public static readonly ShootButton Button = new();
+
     internal sealed class ShootButton : RoleButton
     {
         protected override string Label => "Schießen";
@@ -46,10 +48,11 @@ internal static class Sheriff
         }
         LastShot[sheriff.PlayerId] = now;
 
-        if (Players.IsImpostor(target))
+        if (!Attack.Contact(sheriff, target)) return; // wachsamer Veteran: der Sheriff stirbt
+        if (!Players.IsImpostor(target))
+            Attack.Kill(sheriff); // daneben: der Sheriff stirbt selbst
+        else if (Attack.Lethal(target))
             sheriff.RpcMurderPlayer(target, true);
-        else
-            sheriff.RpcMurderPlayer(sheriff, true); // daneben: der Sheriff stirbt selbst
     }
 
     public static void Reset() => LastShot.Clear();
