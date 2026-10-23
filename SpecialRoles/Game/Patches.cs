@@ -160,6 +160,42 @@ internal static class RpcMurderPlayerPatch
     }
 }
 
+/// <summary>Maulwurf-Vents: Ein-/Aussteigen und Ventilation nicht über den Server (seine Vent-Ids kennt er nicht).</summary>
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.RpcEnterVent))]
+internal static class RpcEnterVentPatch
+{
+    public static bool Prefix(PlayerPhysics __instance, int __0) => MinerVentPatch.Run(__instance, __0, true);
+}
+
+[HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.RpcExitVent))]
+internal static class RpcExitVentPatch
+{
+    public static bool Prefix(PlayerPhysics __instance, int __0) => MinerVentPatch.Run(__instance, __0, false);
+}
+
+[HarmonyPatch(typeof(VentilationSystem), nameof(VentilationSystem.Update))]
+internal static class VentilationUpdatePatch
+{
+    public static bool Prefix(int __1) => !Miner.IsOurs(__1);
+}
+
+internal static class MinerVentPatch
+{
+    /// <summary>false = das Spiel macht nichts mehr (Prefix-Rückgabe).</summary>
+    public static bool Run(PlayerPhysics physics, int ventId, bool enter)
+    {
+        try
+        {
+            return !Miner.TryUseVent(physics, ventId, enter);
+        }
+        catch (Exception exc)
+        {
+            SpecialRolesPlugin.Logger.LogError($"Maulwurf-Vent: {exc}");
+            return !Miner.IsOurs(ventId); // lieber nicht venten als gekickt werden
+        }
+    }
+}
+
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
 internal static class MurderPlayerPatch
 {

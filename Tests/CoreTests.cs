@@ -128,7 +128,8 @@ public class ProtocolTests
     {
         Assert.True(RpcIds.IsOurs(RpcIds.SetRoles));
         Assert.True(RpcIds.IsOurs(RpcIds.Murder));
-        Assert.False(RpcIds.IsOurs(RpcIds.Murder + 1));
+        Assert.True(RpcIds.IsOurs(RpcIds.MinerVentUse));
+        Assert.False(RpcIds.IsOurs(RpcIds.MinerVentUse + 1));
         Assert.False(RpcIds.IsOurs(12)); // MurderPlayer des Spiels
     }
 

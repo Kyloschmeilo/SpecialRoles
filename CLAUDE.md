@@ -18,7 +18,7 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 - `Core/` – spielunabhängig, auch von `Tests/` kompiliert: `Roles.cs` (`RoleId` – Werte gehen übers Netz, nie
   ändern; `RoleCatalog` mit `Implemented`-Flag: nur fertige Rollen werden vergeben/haben Config),
   `RoundSettings.cs` (`SettingId` + `SettingCatalog`: alle Rollen-Einstellungen mit Standard/Min/Max, Config-Abschnitt
-  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–235, `RoleSync` v2 = Rollen + Einstellungen
+  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–236, `RoleSync` v2 = Rollen + Einstellungen
   als Liste (Id, Wert), unbekannte Ids werden ignoriert), `Png.cs` (Bilder als PNG für `ImageConversion.LoadImage`),
   `ButtonText.cs` (ß → ss für die Kill-Knopf-Schrift), `UpdateCheck.cs` (Auto-Update: welches Release).
 - `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Round.cs` (läuft jeden
@@ -80,8 +80,14 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   Client ruft `MurderPlayer(target, Succeeded | DecisionByHost)` selbst auf (wie Rausvoten, das der Server auch nicht
   sieht). Host-Prefix auf `RpcMurderPlayer` leitet außerdem Kills mit Selbst-Ziel, Nicht-Impostor-Killer oder
   wiederbelebten/umgewandelten Spielern (`Attack.MarkChanged`) dorthin um. Noch nicht im Spiel geprüft.
-- Unbekannt: ob offizielle Server eigene Vent-Ids (Maulwurf) oder `RpcSetRole` mitten im Spiel (Vergesslicher) als
-  „Hacking“ werten. Eigene RPC-IDs gehen (3 Runden `SetRoles` online ohne Kick).
+- Kilians Spiel lief am 23.10. abends noch mit **0.2.1** (TestLab-Installation, ohne Updater) – der Kill-Kick um 18:20
+  war deshalb noch der alte Fehler (Vampir-Biss → Selbst-Kill per `RpcMurderPlayer`). Vor Testabenden prüfen, welche
+  Version in `LogOutput.log` steht („SpecialRoles X geladen“).
+- **1.0.4** (23.10.2026, auf `main`): Maulwurf wurde beim Betreten seines Vents gekickt (Vent-Ids ab 150 kennt der
+  Server nicht). → `RpcEnterVent`/`RpcExitVent`-Prefix: bei Maulwurf-Vents `CoEnterVent`/`CoExitVent` selbst starten
+  und RPC `MinerVentUse` (236) an alle; `VentilationSystem.Update` für diese Ids unterdrückt. Noch nicht im Spiel geprüft.
+- Unbekannt: ob offizielle Server `RpcSetRole` mitten im Spiel (Vergesslicher) oder `RpcSnapTo` (Transporter, Vents)
+  als „Hacking“ werten. Eigene RPC-IDs gehen (3 Runden `SetRoles` online ohne Kick).
 - **1.0.1** (23.10.2026, Kilians Wunsch): Auto-Update (`Game/Updater.cs` nach CrewStats-Vorbild, Auswahl in
   `Core/UpdateCheck.cs`: höchste Version aus `releases?per_page=20` **inkl. Pre-Releases** wie der Installer, ohne
   Drafts, nur DLL-URLs aus den eigenen Releases; Config `[Update] AutoUpdate`, Hinweis per `VersionShower.Start`).

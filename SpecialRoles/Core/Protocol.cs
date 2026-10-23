@@ -91,7 +91,13 @@ public static class RpcIds
     /// </summary>
     public const byte Murder = 235;
 
-    public static bool IsOurs(byte callId) => callId is >= SetRoles and <= Murder;
+    /// <summary>
+    /// Spieler → alle: steigt in Maulwurf-Vent (Id) ein (true) oder aus (false). Ersetzt RpcEnterVent/RpcExitVent, denn
+    /// Vent-Ids, die es auf der Map nicht gibt, wertet der Server als „Hacking“.
+    /// </summary>
+    public const byte MinerVentUse = 236;
+
+    public static bool IsOurs(byte callId) => callId is >= SetRoles and <= MinerVentUse;
 }
 
 /// <summary>Was einen tödlichen Angriff abgewehrt hat (geht mit <see cref="RpcIds.ShieldBroken"/> übers Netz).</summary>

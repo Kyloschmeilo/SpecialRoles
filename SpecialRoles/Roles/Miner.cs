@@ -10,6 +10,8 @@ namespace SpecialRoles.Roles;
 /// <summary>
 /// Maulwurf (Impostor): baut eigene Vents, die untereinander verbunden sind (wie eine Vent-Reihe im Spiel). Jeder
 /// Client baut den Vent als Kopie eines vorhandenen mit derselben Id, damit das Venten des Spiels ihn findet.
+/// Diese Ids kennt der Server nicht: Ein-/Aussteigen und die Ventilation laufen darum an ihm vorbei (Patches.cs),
+/// sonst fliegt der Maulwurf wegen „Hacking“ raus (am 23.10.2026 passiert).
 /// </summary>
 internal static class Miner
 {
@@ -91,6 +93,34 @@ internal static class Miner
         all.Add(vent);
         ship.AllVents = all.ToArray();
         SpecialRolesPlugin.Logger.LogInfo($"Maulwurf-Vent {id} gebaut.");
+    }
+
+    /// <summary>Gehört die Vent-Id einem Maulwurf-Vent? (Die Vents des Spiels haben kleine Ids.)</summary>
+    public static bool IsOurs(int ventId) => ventId >= FirstId;
+
+    /// <summary>
+    /// RpcEnterVent/RpcExitVent-Prefix: der eigene Spieler benutzt einen Maulwurf-Vent → selbst ausführen und über die
+    /// eigene Nachricht an alle. true = erledigt, das Spiel schickt nichts.
+    /// </summary>
+    public static bool TryUseVent(PlayerPhysics physics, int ventId, bool enter)
+    {
+        var player = physics.myPlayer;
+        if (!IsOurs(ventId) || player == null || !player.AmOwner) return false;
+        Net.Send(RpcIds.MinerVentUse, writer =>
+        {
+            writer.Write(ventId);
+            writer.Write(enter);
+        });
+        OnUseVent(player, ventId, enter);
+        return true;
+    }
+
+    /// <summary>Alle Clients: dieselbe Animation wie beim Venten des Spiels.</summary>
+    public static void OnUseVent(PlayerControl player, int ventId, bool enter)
+    {
+        var physics = player.MyPhysics;
+        if (!IsOurs(ventId) || physics == null) return;
+        physics.StartCoroutine(enter ? physics.CoEnterVent(ventId) : physics.CoExitVent(ventId));
     }
 
     /// <summary>Spielende: die Vents gehören zum Schiff und verschwinden mit ihm.</summary>

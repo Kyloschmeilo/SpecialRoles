@@ -170,6 +170,13 @@ internal static class Net
                 if (fromHost) Attack.OnMurder(killer, target);
                 break;
             }
+            case RpcIds.MinerVentUse:
+            {
+                var id = reader.ReadInt32();
+                var enter = reader.ReadBoolean();
+                Miner.OnUseVent(sender, id, enter);
+                break;
+            }
         }
     }
 
