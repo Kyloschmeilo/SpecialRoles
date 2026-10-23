@@ -73,7 +73,7 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   `[Vergabe] Spiel-Rollen Anteil` % (Standard 50) – mehr Spieler bleiben Crewmate/Impostor und bekommen eine Mod-Rolle.
   Log je Runde „Spiel-Rollen mit N % … (M Abfragen)“; 0 Abfragen = das Spiel liest die Chance anders, dann wirkungslos.
   Noch nicht im Spiel geprüft.
-- **1.0.3** (23.10.2026, auf `main`): Kilian wurde als Host im echten Online-Spiel (4 Spieler, damals noch 0.2.1)
+- **1.0.3** (23.10.2026, Release auf GitHub): Kilian wurde als Host im echten Online-Spiel (4 Spieler, damals noch 0.2.1)
   gekickt: `Player.log` zeigt „2 trying to murder 2“ (Selbst-Kill per `RpcMurderPlayer`, kurz nach dem Intro) und direkt
   danach „Server > Client DC because Hacking“. Normale Impostor-Kills und die eigenen RPCs (`SetRoles`) liefen davor
   3 Runden ohne Problem. → **Kein `RpcMurderPlayer` für Mod-Kills**: `Attack.Murder` schickt RPC `Murder` (235), jeder
