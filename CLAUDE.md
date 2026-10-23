@@ -58,13 +58,15 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   Von Kilian getestet: „alles klappt“ (22.10.2026).
 - 0.2.0 (22.10.2026, Pre-Release auf GitHub): alle 30 Rollen. Am selben Abend lokal mit TestLab getestet (8 Spieler,
   Bericht `/mnt/project-files/rollen-mod/testlab-test-0.2.0.md`): alle Grundfunktionen laufen, 6 Fehler gefunden.
-- 0.2.1 (22.10.2026, auf `main`, noch nicht veröffentlicht): behebt sie – Knöpfe auch neben dem Haustier-Knopf sichtbar,
+- 0.2.1 (22.10.2026, nie einzeln veröffentlicht, steckt in 1.0.0): behebt sie – Knöpfe auch neben dem Haustier-Knopf sichtbar,
   Übersetzer im Knopf-Klon aus (sonst „KILL“/„ACID“), abgewehrter Kill → RPC `KillBlocked` setzt dem Angreifer den
   Kill-Cooldown (`RpcMurderPlayer(target, false)` macht im Spiel nichts!), Kameramann-Knopf geht beim Durchschauen
   (`NeedsMovement`), Hacker steht still (Karte schließt sonst beim Laufen), Tarner blendet `nameText` aus.
   Am 23.10.2026 mit TestLab 0.1.4 im Spiel bestätigt (alle 22 Knopf-Texte, auch nach Viper; Pet-Knopf; Medic-Schild →
   Cooldown). Dabei gefunden: die Kill-Knopf-Schrift hat **kein „ß“** („SCHIESEN“) → Knopf-Texte und Hinweise laufen
   durch `ButtonText.Safe` (ß → ss), Umlaute gehen. Noch offen: echter Testabend („Hacking“-Kicks, was andere Clients sehen).
+- **1.0.0** (23.10.2026, normales Release auf GitHub, kein Pre-Release): = 0.2.1 + ß-Fix. Kilian: „release das ganze
+  als 1.0“. Standard-Einstellungen sind weiter die Test-Werte (jede Rolle 1 × 100 %).
 - Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
   oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
