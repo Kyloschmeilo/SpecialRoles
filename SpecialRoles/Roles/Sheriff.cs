@@ -52,7 +52,7 @@ internal static class Sheriff
         if (!Players.IsImpostor(target))
             Attack.Kill(sheriff); // daneben: der Sheriff stirbt selbst
         else if (Attack.Lethal(target))
-            sheriff.RpcMurderPlayer(target, true);
+            Attack.Murder(sheriff, target);
     }
 
     public static void Reset() => LastShot.Clear();

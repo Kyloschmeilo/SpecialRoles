@@ -15,6 +15,10 @@ internal static class Attack
     private static readonly HashSet<byte> LuckUsed = new();
     private static readonly HashSet<byte> ArmorUsed = new();
 
+    // Host: wen der Server anders kennt (wiederbelebt, Spielrolle mitten im Spiel gewechselt) – auch normale Kills mit
+    // ihnen laufen über Murder (RpcMurderPlayer-Prefix)
+    private static readonly HashSet<byte> Changed = new();
+
     /// <summary>
     /// Der Angreifer berührt das Ziel (Kill, Schuss, Biss, Bombe ankleben …). Ist das Ziel ein wachsamer Veteran,
     /// stirbt der Angreifer. false = Angriff hat nicht stattgefunden.
@@ -53,7 +57,40 @@ internal static class Attack
     }
 
     /// <summary>Tötet ohne Teleport: der Spieler „stirbt an Ort und Stelle“ (Mörder = er selbst).</summary>
-    public static void Kill(PlayerControl target) => target.RpcMurderPlayer(target, true);
+    public static void Kill(PlayerControl target) => Murder(target, target);
+
+    /// <summary>
+    /// Host: killer tötet target – über <see cref="RpcIds.Murder"/> statt RpcMurderPlayer. Der Server kennt keine
+    /// Mod-Rollen und wirft den Host wegen „Hacking“ raus, wenn er einen für ihn unmöglichen Kill sieht (am 23.10.2026
+    /// passiert: Selbst-Kill direkt nach dem Intro). Darum führt jeder Client den Kill selbst aus, wie beim Rausvoten.
+    /// </summary>
+    public static void Murder(PlayerControl killer, PlayerControl target)
+    {
+        var killerId = killer.PlayerId;
+        var targetId = target.PlayerId;
+        Net.Send(RpcIds.Murder, writer =>
+        {
+            writer.Write(killerId);
+            writer.Write(targetId);
+        });
+        OnMurder(killerId, targetId);
+    }
+
+    /// <summary>Alle Clients (vom Host): derselbe Kill wie bei RpcMurderPlayer(target, true).</summary>
+    public static void OnMurder(byte killerId, byte targetId)
+    {
+        var killer = Players.ById(killerId);
+        var target = Players.ById(targetId);
+        if (killer == null || target == null || !Players.IsAlive(target)) return;
+        killer.MurderPlayer(target, MurderResultFlags.Succeeded | MurderResultFlags.DecisionByHost);
+    }
+
+    public static void MarkChanged(byte playerId) => Changed.Add(playerId);
+
+    /// <summary>Host, RpcMurderPlayer-Prefix: true = der Server könnte diesen Kill ablehnen → selbst ausführen.</summary>
+    public static bool ServerMightReject(PlayerControl killer, PlayerControl target) =>
+        killer.PlayerId == target.PlayerId || !Players.IsImpostor(killer)
+        || Changed.Contains(killer.PlayerId) || Changed.Contains(target.PlayerId);
 
     /// <summary>Host: allen sagen, dass ein Angriff abgewehrt wurde.</summary>
     public static void SendProtected(byte targetId, Protection kind)
@@ -112,5 +149,6 @@ internal static class Attack
     {
         LuckUsed.Clear();
         ArmorUsed.Clear();
+        Changed.Clear();
     }
 }

@@ -123,6 +123,15 @@ public class ProtocolTests
         Assert.Equal(10f, decoded.Settings.Get(SettingId.VampireDelay)); // Standardwert
     }
 
+    [Fact]
+    public void OwnRpcIdsAreRecognized()
+    {
+        Assert.True(RpcIds.IsOurs(RpcIds.SetRoles));
+        Assert.True(RpcIds.IsOurs(RpcIds.Murder));
+        Assert.False(RpcIds.IsOurs(RpcIds.Murder + 1));
+        Assert.False(RpcIds.IsOurs(12)); // MurderPlayer des Spiels
+    }
+
     private static RoundSettings Settings(params (SettingId Id, float Value)[] values) =>
         new(values.Select(v => new KeyValuePair<SettingId, float>(v.Id, v.Value)));
 

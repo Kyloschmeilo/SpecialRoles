@@ -18,7 +18,7 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 - `Core/` – spielunabhängig, auch von `Tests/` kompiliert: `Roles.cs` (`RoleId` – Werte gehen übers Netz, nie
   ändern; `RoleCatalog` mit `Implemented`-Flag: nur fertige Rollen werden vergeben/haben Config),
   `RoundSettings.cs` (`SettingId` + `SettingCatalog`: alle Rollen-Einstellungen mit Standard/Min/Max, Config-Abschnitt
-  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–234, `RoleSync` v2 = Rollen + Einstellungen
+  = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–235, `RoleSync` v2 = Rollen + Einstellungen
   als Liste (Id, Wert), unbekannte Ids werden ignoriert), `Png.cs` (Bilder als PNG für `ImageConversion.LoadImage`),
   `ButtonText.cs` (ß → ss für die Kill-Knopf-Schrift), `UpdateCheck.cs` (Auto-Update: welches Release).
 - `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Round.cs` (läuft jeden
@@ -73,8 +73,15 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   `[Vergabe] Spiel-Rollen Anteil` % (Standard 50) – mehr Spieler bleiben Crewmate/Impostor und bekommen eine Mod-Rolle.
   Log je Runde „Spiel-Rollen mit N % … (M Abfragen)“; 0 Abfragen = das Spiel liest die Chance anders, dann wirkungslos.
   Noch nicht im Spiel geprüft.
-- Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
-  oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
+- **1.0.3** (23.10.2026, auf `main`): Kilian wurde als Host im echten Online-Spiel (4 Spieler, damals noch 0.2.1)
+  gekickt: `Player.log` zeigt „2 trying to murder 2“ (Selbst-Kill per `RpcMurderPlayer`, kurz nach dem Intro) und direkt
+  danach „Server > Client DC because Hacking“. Normale Impostor-Kills und die eigenen RPCs (`SetRoles`) liefen davor
+  3 Runden ohne Problem. → **Kein `RpcMurderPlayer` für Mod-Kills**: `Attack.Murder` schickt RPC `Murder` (235), jeder
+  Client ruft `MurderPlayer(target, Succeeded | DecisionByHost)` selbst auf (wie Rausvoten, das der Server auch nicht
+  sieht). Host-Prefix auf `RpcMurderPlayer` leitet außerdem Kills mit Selbst-Ziel, Nicht-Impostor-Killer oder
+  wiederbelebten/umgewandelten Spielern (`Attack.MarkChanged`) dorthin um. Noch nicht im Spiel geprüft.
+- Unbekannt: ob offizielle Server eigene Vent-Ids (Maulwurf) oder `RpcSetRole` mitten im Spiel (Vergesslicher) als
+  „Hacking“ werten. Eigene RPC-IDs gehen (3 Runden `SetRoles` online ohne Kick).
 - **1.0.1** (23.10.2026, Kilians Wunsch): Auto-Update (`Game/Updater.cs` nach CrewStats-Vorbild, Auswahl in
   `Core/UpdateCheck.cs`: höchste Version aus `releases?per_page=20` **inkl. Pre-Releases** wie der Installer, ohne
   Drafts, nur DLL-URLs aus den eigenen Releases; Config `[Update] AutoUpdate`, Hinweis per `VersionShower.Start`).

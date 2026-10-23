@@ -63,6 +63,7 @@ internal static class Altruist
         Deaths.Forget(playerId);
         player.Revive();
         RoleManager.Instance.SetRole(player, role);
+        Attack.MarkChanged(playerId); // der Server hält ihn weiter für tot
         if (player.AmOwner)
         {
             player.NetTransform.RpcSnapTo(position); // bewegen darf sich jeder nur selbst

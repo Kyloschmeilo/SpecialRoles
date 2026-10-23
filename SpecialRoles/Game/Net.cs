@@ -163,6 +163,13 @@ internal static class Net
                 if (fromHost) Attack.OnKillBlocked(killer);
                 break;
             }
+            case RpcIds.Murder:
+            {
+                var killer = reader.ReadByte();
+                var target = reader.ReadByte();
+                if (fromHost) Attack.OnMurder(killer, target);
+                break;
+            }
         }
     }
 

@@ -43,7 +43,11 @@ internal static class Amnesiac
         var newRole = RoleState.Get(bodyId);
         if (newRole == RoleId.Amnesiac) newRole = RoleId.None;
         var gameRole = Deaths.RoleBeforeDeath(bodyId) ?? RoleTypes.Crewmate;
-        if (gameRole != RoleTypes.Crewmate) amnesiac.RpcSetRole(gameRole, true);
+        if (gameRole != RoleTypes.Crewmate)
+        {
+            amnesiac.RpcSetRole(gameRole, true);
+            Attack.MarkChanged(amnesiac.PlayerId);
+        }
 
         var id = amnesiac.PlayerId;
         Net.Send(RpcIds.RoleChange, writer =>

@@ -85,7 +85,13 @@ public static class RpcIds
     /// <summary>Host → alle: Kill von PlayerId auf PlayerId wurde abgewehrt (der Angreifer bekommt seinen Kill-Cooldown).</summary>
     public const byte KillBlocked = 234;
 
-    public static bool IsOurs(byte callId) => callId is >= SetRoles and <= KillBlocked;
+    /// <summary>
+    /// Host → alle: PlayerId tötet PlayerId (gleiche Id = stirbt ohne Teleport). Jeder Client führt den Kill selbst aus,
+    /// der Server sieht ihn nicht – sonst wirft er den Host wegen „Hacking“ raus (Selbst-Kill, Kill durch einen Crewmate).
+    /// </summary>
+    public const byte Murder = 235;
+
+    public static bool IsOurs(byte callId) => callId is >= SetRoles and <= Murder;
 }
 
 /// <summary>Was einen tödlichen Angriff abgewehrt hat (geht mit <see cref="RpcIds.ShieldBroken"/> übers Netz).</summary>

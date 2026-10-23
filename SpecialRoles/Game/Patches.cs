@@ -137,6 +137,29 @@ internal static class CmdCheckMurderPatch
     }
 }
 
+/// <summary>
+/// Host: Kills, die der Server für „Hacking“ halten könnte (Selbst-Kill, Wiederbelebte, Rollenwechsel), nicht über das
+/// Spiel schicken, sondern über die eigene Nachricht.
+/// </summary>
+[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcMurderPlayer))]
+internal static class RpcMurderPlayerPatch
+{
+    public static bool Prefix(PlayerControl __instance, PlayerControl __0, bool __1)
+    {
+        try
+        {
+            if (!Players.IsHost || !__1 || __0 == null || !Attack.ServerMightReject(__instance, __0)) return true;
+            Attack.Murder(__instance, __0);
+            return false;
+        }
+        catch (Exception exc)
+        {
+            SpecialRolesPlugin.Logger.LogError($"Kill senden: {exc}");
+            return true;
+        }
+    }
+}
+
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
 internal static class MurderPlayerPatch
 {
