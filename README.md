@@ -3,7 +3,7 @@
 Eine BepInEx-Mod für **Among Us auf Steam (64-Bit)** mit 30 neuen Rollen: 17 für die Crew, 11 für Impostor und
 2 neutrale, dazu den Modifikator **Flash**. Alle Rollen erklärt der Discord-Bot mit `/special-rolle`.
 
-> **Stand 1.0.0:** alle 30 Rollen sind eingebaut und mit Test-Bots im Spiel geprüft. Ein Abend mit vielen echten
+> **Stand 1.0.1:** alle 30 Rollen sind eingebaut und mit Test-Bots im Spiel geprüft. Ein Abend mit vielen echten
 > Spielern steht noch aus – Fehler bitte melden.
 
 ## Installieren
@@ -12,7 +12,9 @@ Eine BepInEx-Mod für **Among Us auf Steam (64-Bit)** mit 30 neuen Rollen: 17 f�
 2. Doppelklicken. Windows warnt evtl. vor einer unbekannten Datei → **Weitere Informationen → Trotzdem ausführen**.
 3. Enter drücken – der Installer findet Among Us, installiert BepInEx (64-Bit, falls noch nicht da) und die Mod.
 
-Neue Version: Installer einfach nochmal starten. Deinstallieren: Installer starten und **2** wählen
+Neue Versionen installiert die Mod ab 1.0.1 selbst: beim Spielstart sucht sie auf GitHub nach einem Update, im
+Hauptmenü steht dann „… installiert – bitte Among Us neu starten“ (ausschalten: `[Update] AutoUpdate = false`).
+Ältere Versionen: Installer einfach nochmal starten. Deinstallieren: Installer starten und **2** wählen
 (CrewStats und andere Mods bleiben erhalten). Der erste Spielstart dauert 1–2 Minuten.
 
 ## Wie es funktioniert

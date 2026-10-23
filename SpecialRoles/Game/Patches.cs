@@ -278,3 +278,16 @@ internal static class ExitGamePatch
 {
     public static void Prefix() => Round.EndGame();
 }
+
+// ---------- Auto-Update ----------
+
+[HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
+internal static class VersionShowerPatch
+{
+    // Hinweis unter der Versionsnummer im Hauptmenü, wenn ein Update installiert wurde
+    public static void Postfix(VersionShower __instance) => Safe.Run(() =>
+    {
+        if (Updater.Notice != null && __instance.text != null)
+            __instance.text.text += $"\n<color=#FFD54F>{Updater.Notice}</color>";
+    });
+}

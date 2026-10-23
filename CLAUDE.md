@@ -19,7 +19,8 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   ändern; `RoleCatalog` mit `Implemented`-Flag: nur fertige Rollen werden vergeben/haben Config),
   `RoundSettings.cs` (`SettingId` + `SettingCatalog`: alle Rollen-Einstellungen mit Standard/Min/Max, Config-Abschnitt
   = Rollenname), `RoleAssigner.cs` (Vergabe), `Protocol.cs` (RPC-IDs 210–234, `RoleSync` v2 = Rollen + Einstellungen
-  als Liste (Id, Wert), unbekannte Ids werden ignoriert), `Png.cs` (Bilder als PNG für `ImageConversion.LoadImage`).
+  als Liste (Id, Wert), unbekannte Ids werden ignoriert), `Png.cs` (Bilder als PNG für `ImageConversion.LoadImage`),
+  `ButtonText.cs` (ß → ss für die Kill-Knopf-Schrift), `UpdateCheck.cs` (Auto-Update: welches Release).
 - `Game/` – Spiel-Anbindung: `Patches.cs` (alle Harmony-Patches, Parameter positional `__0`), `Round.cs` (läuft jeden
   Frame aus HudManager.Update: Meeting-Beginn/-Ende, alle Rollen-Updates, `EndGame`/`NewGame`), `Net.cs` (eigene RPCs
   über `PlayerControl.HandleRpc`, Host-Nachrichten werden nur vom Host angenommen), `Attack.cs` (Host: **jeder**
@@ -69,5 +70,9 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   als 1.0“. Standard-Einstellungen sind weiter die Test-Werte (jede Rolle 1 × 100 %).
 - Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
   oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
-- Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
-  Auto-Update (Vorlage: CrewStats `Updater.cs`; muss Pre-Releases berücksichtigen).
+- **1.0.1** (23.10.2026, Kilians Wunsch): Auto-Update (`Game/Updater.cs` nach CrewStats-Vorbild, Auswahl in
+  `Core/UpdateCheck.cs`: höchste Version aus `releases?per_page=20` **inkl. Pre-Releases** wie der Installer, ohne
+  Drafts, nur DLL-URLs aus den eigenen Releases; Config `[Update] AutoUpdate`, Hinweis per `VersionShower.Start`).
+  Alte DLL → `.old` (beim nächsten Start gelöscht). 1.0.0 hat noch keinen Updater → alle einmal per Installer.
+  Gegen die echte Releases-Antwort geprüft; das Tauschen im Spiel greift erst beim ersten Release nach 1.0.1.
+- Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby.

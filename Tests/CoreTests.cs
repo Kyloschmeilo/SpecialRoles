@@ -245,3 +245,62 @@ public class ButtonTextTests
         Assert.Equal("Wählen", ButtonText.Safe("Wählen")); // Umlaute hat die Schrift
     }
 }
+
+public class UpdateCheckTests
+{
+    private const string Download = "https://github.com/Kyloschmeilo/SpecialRoles/releases/download/";
+
+    private static string Release(string tag, bool prerelease = false, bool draft = false, string? asset = "SpecialRoles.dll",
+        string? url = null) =>
+        $$"""
+        {"tag_name":"{{tag}}","draft":{{(draft ? "true" : "false")}},"prerelease":{{(prerelease ? "true" : "false")}},
+         "assets":[{{(asset == null ? "" : $$"""{"name":"{{asset}}","browser_download_url":"{{url ?? Download + tag + "/" + asset}}"}""")}}]}
+        """;
+
+    private static UpdateCheck.Update? Find(string current, params string[] releases) =>
+        UpdateCheck.FindNewer("[" + string.Join(",", releases) + "]", UpdateCheck.ParseVersion(current)!);
+
+    [Fact]
+    public void VersionsAreNormalized()
+    {
+        Assert.Equal(new Version(1, 0, 0), UpdateCheck.ParseVersion("v1.0"));
+        Assert.Equal(new Version(1, 2, 3), UpdateCheck.ParseVersion("1.2.3+abc123"));
+        Assert.Equal(new Version(1, 2, 3), UpdateCheck.ParseVersion("V1.2.3-beta"));
+        Assert.Null(UpdateCheck.ParseVersion("neu"));
+    }
+
+    [Fact]
+    public void PicksTheHighestNewerVersion()
+    {
+        var update = Find("1.0.0", Release("v1.0.1"), Release("v1.2.0", prerelease: true), Release("v1.1.0"));
+        Assert.NotNull(update);
+        Assert.Equal(new Version(1, 2, 0), update!.Version);
+        Assert.True(update.Prerelease);
+        Assert.Equal(Download + "v1.2.0/SpecialRoles.dll", update.DownloadUrl);
+    }
+
+    [Fact]
+    public void NothingWhenUpToDate()
+    {
+        Assert.Null(Find("1.0.1", Release("v1.0.1"), Release("v1.0.0"), Release("v0.2.0", prerelease: true)));
+    }
+
+    [Fact]
+    public void SkipsDraftsReleasesWithoutDllAndForeignUrls()
+    {
+        Assert.Null(Find("1.0.0",
+            Release("v2.0.0", draft: true),
+            Release("v1.9.0", asset: "CrewStats.dll"),
+            Release("v1.8.0", url: "https://example.com/SpecialRoles.dll")));
+    }
+
+    [Fact]
+    public void RecognizesDlls()
+    {
+        var dll = new byte[20_000];
+        dll[0] = (byte)'M';
+        dll[1] = (byte)'Z';
+        Assert.True(UpdateCheck.LooksLikeDll(dll));
+        Assert.False(UpdateCheck.LooksLikeDll(System.Text.Encoding.UTF8.GetBytes("<html>Not Found</html>")));
+    }
+}

@@ -1,7 +1,10 @@
+using System.Threading.Tasks;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
+using SpecialRoles.Game;
 
 namespace SpecialRoles;
 
@@ -15,6 +18,7 @@ namespace SpecialRoles;
 public partial class SpecialRolesPlugin : BasePlugin
 {
     internal static ManualLogSource Logger { get; private set; } = null!;
+    internal static ConfigEntry<bool> AutoUpdate { get; private set; } = null!;
 
     public Harmony Harmony { get; } = new(Id);
 
@@ -22,7 +26,12 @@ public partial class SpecialRolesPlugin : BasePlugin
     {
         Logger = Log;
         Settings.Bind(Config);
+        AutoUpdate = Config.Bind("Update", "AutoUpdate", true,
+            "Beim Spielstart auf GitHub nach einer neuen SpecialRoles-Version suchen und sie installieren " +
+            "(aktiv ab dem nächsten Start).");
         Harmony.PatchAll();
         Log.LogInfo($"SpecialRoles {Version} geladen.");
+        Updater.RemoveLeftovers();
+        Task.Run(Updater.CheckAsync);
     }
 }
