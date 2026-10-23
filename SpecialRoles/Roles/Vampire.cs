@@ -76,7 +76,7 @@ internal static class Vampire
     {
         if (RoleState.Local != RoleId.Vampire || hud.KillButton == null || Time.time < _labelAt) return;
         _labelAt = Time.time + 1f;
-        hud.KillButton.OverrideText("Beißen");
+        hud.KillButton.OverrideText(ButtonText.Safe("Beißen"));
     }
 
     public static void Reset()

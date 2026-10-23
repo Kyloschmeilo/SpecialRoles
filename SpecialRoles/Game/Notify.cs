@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SpecialRoles.Core;
 using TMPro;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -37,7 +38,7 @@ internal static class Notify
     {
         var text = Text();
         if (text == null) return;
-        text.text = string.Join("\n", Lines.ConvertAll(l => l.Text));
+        text.text = ButtonText.Safe(string.Join("\n", Lines.ConvertAll(l => l.Text)));
         text.gameObject.SetActive(Lines.Count > 0);
     }
 

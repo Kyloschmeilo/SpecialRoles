@@ -1,4 +1,5 @@
 using System;
+using SpecialRoles.Core;
 using UnityEngine;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
@@ -89,7 +90,7 @@ internal abstract class RoleButton
         var labelText = _button.buttonLabelText;
         if (label != _shownLabel || (labelText != null && labelText.text != _appliedText))
         {
-            _button.OverrideText(label);
+            _button.OverrideText(ButtonText.Safe(label));
             _shownLabel = label;
             _appliedText = labelText != null ? labelText.text : "";
         }

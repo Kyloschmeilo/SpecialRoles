@@ -235,3 +235,13 @@ public class PngTests
         return crc ^ 0xFFFFFFFFu;
     }
 }
+
+public class ButtonTextTests
+{
+    [Fact]
+    public void SharpSBecomesDoubleS()
+    {
+        Assert.Equal("Schiessen", ButtonText.Safe("Schießen"));
+        Assert.Equal("Wählen", ButtonText.Safe("Wählen")); // Umlaute hat die Schrift
+    }
+}

@@ -62,7 +62,9 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   Übersetzer im Knopf-Klon aus (sonst „KILL“/„ACID“), abgewehrter Kill → RPC `KillBlocked` setzt dem Angreifer den
   Kill-Cooldown (`RpcMurderPlayer(target, false)` macht im Spiel nichts!), Kameramann-Knopf geht beim Durchschauen
   (`NeedsMovement`), Hacker steht still (Karte schließt sonst beim Laufen), Tarner blendet `nameText` aus.
-  Noch offen: echter Testabend („Hacking“-Kicks, was andere Clients sehen).
+  Am 23.10.2026 mit TestLab 0.1.4 im Spiel bestätigt (alle 22 Knopf-Texte, auch nach Viper; Pet-Knopf; Medic-Schild →
+  Cooldown). Dabei gefunden: die Kill-Knopf-Schrift hat **kein „ß“** („SCHIESEN“) → Knopf-Texte und Hinweise laufen
+  durch `ButtonText.Safe` (ß → ss), Umlaute gehen. Noch offen: echter Testabend („Hacking“-Kicks, was andere Clients sehen).
 - Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
   oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
 - Fehlt noch: Lobby-Einstellungen im Spiel (bisher Config des Hosts), Rolle im Intro, Versions-Check in der Lobby,
