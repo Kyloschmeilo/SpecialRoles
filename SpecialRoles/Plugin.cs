@@ -30,6 +30,7 @@ public partial class SpecialRolesPlugin : BasePlugin
             "Beim Spielstart auf GitHub nach einer neuen SpecialRoles-Version suchen und sie installieren " +
             "(aktiv ab dem nächsten Start).");
         Harmony.PatchAll();
+        GameRoleChance.Install(Harmony);
         Log.LogInfo($"SpecialRoles {Version} geladen.");
         Updater.RemoveLeftovers();
         Task.Run(Updater.CheckAsync);

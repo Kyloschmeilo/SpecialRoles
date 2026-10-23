@@ -93,6 +93,20 @@ public class RoleAssignerTests
     }
 }
 
+public class GameRoleChanceTests
+{
+    [Theory]
+    [InlineData(100, 50, 50)]
+    [InlineData(100, 100, 100)]
+    [InlineData(60, 50, 30)]
+    [InlineData(1, 50, 1)]
+    [InlineData(0, 50, 0)]
+    [InlineData(100, 0, 0)]
+    [InlineData(150, 50, 50)]
+    public void ScalesTheLobbyChance(int chance, int percent, int expected) =>
+        Assert.Equal(expected, RoleAssigner.ScaleGameRoleChance(chance, percent));
+}
+
 public class ProtocolTests
 {
     [Fact]

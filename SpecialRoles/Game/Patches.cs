@@ -17,8 +17,14 @@ namespace SpecialRoles.Game;
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 internal static class SelectRolesPatch
 {
+    public static void Prefix() => Safe.Run(GameRoleChance.BeforeSelectRoles);
+
     [HarmonyPriority(Priority.Last)]
-    public static void Postfix() => Safe.Run(Distribution.HostAssign);
+    public static void Postfix()
+    {
+        Safe.Run(GameRoleChance.AfterSelectRoles);
+        Safe.Run(Distribution.HostAssign);
+    }
 }
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.HandleRpc))]

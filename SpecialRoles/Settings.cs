@@ -17,6 +17,7 @@ internal static class Settings
     private static readonly Dictionary<SettingId, ConfigEntry<float>> Values = new();
     private static ConfigEntry<int> _flashCount = null!;
     private static ConfigEntry<int> _flashChance = null!;
+    private static ConfigEntry<int> _gameRoleShare = null!;
 
     public static void Bind(ConfigFile config)
     {
@@ -37,6 +38,11 @@ internal static class Settings
         _flashChance = config.Bind("Modifikatoren", "Flash Chance", 100,
             new ConfigDescription("Chance in Prozent, dass es einen Flash gibt.", new AcceptableValueRange<int>(0, 100)));
 
+        _gameRoleShare = config.Bind("Vergabe", "Spiel-Rollen Anteil", 50,
+            new ConfigDescription("Spiel-Rollen (Engineer, Shapeshifter, Viper …) kommen beim Rundenstart nur mit diesem " +
+                "Anteil ihrer Lobby-Chance vor (in Prozent), damit Mod-Rollen häufiger sind. 100 = wie in der Lobby eingestellt.",
+                new AcceptableValueRange<int>(0, 100)));
+
         foreach (var def in SettingCatalog.All)
         {
             if (def.Role != RoleId.None && RoleCatalog.Get(def.Role)?.Implemented != true) continue;
@@ -50,6 +56,7 @@ internal static class Settings
 
     public static int FlashCount => _flashCount.Value;
     public static int FlashChance => _flashChance.Value;
+    public static int GameRoleShare => _gameRoleShare.Value;
 
     public static RoundSettings Round() =>
         new(Values.Select(kv => new KeyValuePair<SettingId, float>(kv.Key, kv.Value.Value)));

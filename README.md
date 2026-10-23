@@ -70,6 +70,10 @@ Einstellungen des **Hosts**: pro Rolle *Anzahl* und *Chance* (Standard zum Teste
 jeder eine Rolle; auf 0 stellen schaltet eine Rolle ab), dazu je Rolle Cooldowns, Dauer, Einsätze usw. und
 Flash-Anzahl/-Chance/-Tempo.
 
+Mod-Rollen bekommen nur Spieler ohne Spiel-Rolle. Damit sie häufiger sind als die Spiel-Rollen (Engineer,
+Shapeshifter, Viper …), würfelt der Host die Spiel-Rollen nur mit einem Teil ihrer Lobby-Chance:
+`[Vergabe] Spiel-Rollen Anteil` (Standard 50 %, 100 = wie in der Lobby eingestellt).
+
 ## Bauen
 
 ```

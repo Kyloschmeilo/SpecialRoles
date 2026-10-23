@@ -68,6 +68,11 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
   durch `ButtonText.Safe` (ß → ss), Umlaute gehen. Noch offen: echter Testabend („Hacking“-Kicks, was andere Clients sehen).
 - **1.0.0** (23.10.2026, normales Release auf GitHub, kein Pre-Release): = 0.2.1 + ß-Fix. Kilian: „release das ganze
   als 1.0“. Standard-Einstellungen sind weiter die Test-Werte (jede Rolle 1 × 100 %).
+- 1.0.2 (23.10.2026, auf `main`): Kilian: „Custom Rollen etwas wahrscheinlicher als die normalen“ → `GameRoleChance.cs`:
+  als Host während `SelectRoles` liefert `RoleOptionsCollectionV10–V12.GetChancePerGame` für Spiel-Rollen nur
+  `[Vergabe] Spiel-Rollen Anteil` % (Standard 50) – mehr Spieler bleiben Crewmate/Impostor und bekommen eine Mod-Rolle.
+  Log je Runde „Spiel-Rollen mit N % … (M Abfragen)“; 0 Abfragen = das Spiel liest die Chance anders, dann wirkungslos.
+  Noch nicht im Spiel geprüft.
 - Unbekannt: ob offizielle Server eigene RPC-IDs, Host-Kills durch Crewmates (Sheriff), eigene Vent-Ids (Maulwurf)
   oder `RpcSetRole` mitten im Spiel (Vergesslicher, Altruist) als „Hacking“ werten.
 - **1.0.1** (23.10.2026, Kilians Wunsch): Auto-Update (`Game/Updater.cs` nach CrewStats-Vorbild, Auswahl in

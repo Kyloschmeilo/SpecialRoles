@@ -93,6 +93,17 @@ public static class RoleAssigner
         }
     }
 
+    /// <summary>
+    /// Chance einer Spiel-Rolle (Engineer, Shapeshifter …) beim Würfeln des Spiels: percent % der Lobby-Chance,
+    /// damit Mod-Rollen häufiger vorkommen. 100 % bleibt 100 % nur bei percent = 100.
+    /// </summary>
+    public static int ScaleGameRoleChance(int chance, int percent)
+    {
+        chance = Math.Clamp(chance, 0, 100);
+        percent = Math.Clamp(percent, 0, 100);
+        return (int)Math.Round(chance * percent / 100.0, MidpointRounding.AwayFromZero);
+    }
+
     public static void Shuffle<T>(IList<T> list, Func<int, int> next)
     {
         for (var i = list.Count - 1; i > 0; i--)
