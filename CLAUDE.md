@@ -83,7 +83,7 @@ Among-Us-Mod (C#, BepInEx 6 IL2CPP x64, wie CrewStats) mit 30 neuen Rollen. Geh�
 - Kilians Spiel lief am 23.10. abends noch mit **0.2.1** (TestLab-Installation, ohne Updater) – der Kill-Kick um 18:20
   war deshalb noch der alte Fehler (Vampir-Biss → Selbst-Kill per `RpcMurderPlayer`). Vor Testabenden prüfen, welche
   Version in `LogOutput.log` steht („SpecialRoles X geladen“).
-- **1.0.4** (23.10.2026, auf `main`): Maulwurf wurde beim Betreten seines Vents gekickt (Vent-Ids ab 150 kennt der
+- **1.0.4** (23.10.2026, Release auf GitHub): Maulwurf wurde beim Betreten seines Vents gekickt (Vent-Ids ab 150 kennt der
   Server nicht). → `RpcEnterVent`/`RpcExitVent`-Prefix: bei Maulwurf-Vents `CoEnterVent`/`CoExitVent` selbst starten
   und RPC `MinerVentUse` (236) an alle; `VentilationSystem.Update` für diese Ids unterdrückt. Noch nicht im Spiel geprüft.
 - Unbekannt: ob offizielle Server `RpcSetRole` mitten im Spiel (Vergesslicher) oder `RpcSnapTo` (Transporter, Vents)
